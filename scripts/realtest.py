@@ -18,6 +18,13 @@ TRACE_PATH = "/cdn-cgi/trace"
 BASE_PORT = 21000
 BATCH = 400
 REQ_TIMEOUT = 8.0
+PARALLEL = 120            # طلبات متزامنة جوه كل دفعة
+REASONS = {}
+
+
+def _why(k):
+    REASONS[k] = REASONS.get(k, 0) + 1
+
 MAX_SECONDS = 25 * 60     # أقصى وقت للاختبار الحقيقي
 
 
@@ -58,8 +65,6 @@ def _stream(net, security, host, path, sni, fp, alpn, pbk=None, sid=None, spx=No
             t["fingerprint"] = fp if fp.lower() in FPS else "chrome"
         if alpn:
             t["alpn"] = [a for a in alpn.split(",") if a]
-        if allow_insecure:
-            t["allowInsecure"] = True
         s["security"] = "tls"
         s["tlsSettings"] = t
     elif security == "reality":
@@ -196,11 +201,13 @@ async def _socks_http(port, host, path, timeout):
         await loop.sock_connect(s, ("127.0.0.1", port))
         await loop.sock_sendall(s, b"\x05\x01\x00")
         if await loop.sock_recv(s, 2) != b"\x05\x00":
+            _why("socks_auth")
             raise OSError("socks auth")
         hb = host.encode()
         await loop.sock_sendall(s, b"\x05\x01\x00\x03" + bytes([len(hb)]) + hb + (80).to_bytes(2, "big"))
         r = await loop.sock_recv(s, 10)
         if len(r) < 2 or r[1] != 0:
+            _why(f"socks_rep_{r[1] if len(r) > 1 else 'x'}")
             raise OSError("socks connect")
         await loop.sock_sendall(s, f"GET {path} HTTP/1.1\r\nHost: {host}\r\nUser-Agent: curl/8\r\nConnection: close\r\n\r\n".encode())
         data = b""
@@ -222,9 +229,14 @@ async def _probe(port, ctx=None):
         t0 = time.perf_counter()
         st, _ = await _socks_http(port, "www.gstatic.com", "/generate_204", REQ_TIMEOUT)
         if st != 204:
+            _why(f"status_{st}")
             return None
         ms = int((time.perf_counter() - t0) * 1000)
-    except Exception:
+    except asyncio.TimeoutError:
+        _why("timeout")
+        return None
+    except Exception as e:
+        _why(type(e).__name__)
         return None
     ip = None
     try:  # IP الخروج الحقيقي (من Amazon مش Cloudflare)
@@ -239,13 +251,14 @@ async def _probe(port, ctx=None):
 
 async def _probe_all(n):
     ctx = ssl.create_default_context()
-    sem = asyncio.Semaphore(n)
+    sem = asyncio.Semaphore(min(n, PARALLEL))
 
     async def one(i):
         async with sem:
             try:
                 return await asyncio.wait_for(_probe(BASE_PORT + i, ctx), REQ_TIMEOUT + 8)
             except Exception:
+                _why("outer_timeout")
                 return None
     return await asyncio.gather(*(one(i) for i in range(n)))
 
@@ -304,8 +317,10 @@ def real_test(xray, configs, log=print):
     for idx, c in enumerate(configs):
         try:
             items.append((idx, to_outbound(c, "x")))
-        except Exception:
+        except Exception as e:
             diag["convert_errors"] += 1
+            k = "conv:" + str(e)[:40]
+            REASONS[k] = REASONS.get(k, 0) + 1
     diag["tested"] = len(items)
     t0 = time.time()
     deadline = t0 + MAX_SECONDS
@@ -320,4 +335,5 @@ def real_test(xray, configs, log=print):
             c.ms, c.cc, c.exit_ip = ms, (loc or "").upper() or None, ip
         diag["ok"] += len(res)
         log(f"   دفعة {b // BATCH + 1}: {len(res)}/{len(items[b:b + BATCH])} شغال — إجمالي {diag['ok']} ({int(time.time() - t0)}s)")
+    diag["fail_reasons"] = dict(REASONS)
     return diag
