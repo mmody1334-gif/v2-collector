@@ -1,0 +1,55 @@
+name: Update servers
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"   # كل 3 ساعات
+  workflow_dispatch:          # تشغيل يدوي من تبويب Actions
+  push:
+    branches: [main]
+    paths: ["scripts/**", "sources.txt", ".github/workflows/**"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download GeoIP database
+        run: curl -sSL --retry 3 -o Country.mmdb https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/GeoLite2-Country.mmdb
+
+      - name: Collect, test & split
+        run: python scripts/collect.py --sources sources.txt --mmdb Country.mmdb --out out
+
+      - name: Publish to "subs" branch
+        run: |
+          cd out
+          git init -q -b subs
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "update $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" subs
+
+      # GitHub بيوقف الجدولة لو الريبو مفيهوش نشاط 60 يوم — ده بيمنع كده
+      - name: Keep schedule alive
+        run: |
+          last=$(git log -1 --format=%ct)
+          now=$(date +%s)
+          if [ $(( (now - last) / 86400 )) -ge 45 ]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -q --allow-empty -m "keepalive"
+            git push -q
+          fi

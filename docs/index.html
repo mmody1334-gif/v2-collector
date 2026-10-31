@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1416">
+<title>سيرفراتي — V2 Collector</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --bg:#0f1416; --card:#1a2124; --card2:#212a2e; --line:#2b363a;
+    --text:#e8eef0; --muted:#8fa1a7; --accent:#2a8fa3; --accent2:#136a7d;
+    --good:#3ccf8e; --mid:#f2c14e; --bad:#ef6b6b;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Tahoma,"Noto Sans Arabic",sans-serif;
+    padding-bottom:150px}
+  header{padding:22px 16px 8px}
+  h1{margin:0;font-size:26px}
+  .sub{color:var(--muted);font-size:13px;margin-top:4px}
+  .stats{display:flex;gap:8px;margin:14px 0 4px;flex-wrap:wrap}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;flex:1;min-width:90px}
+  .stat b{display:block;font-size:20px}
+  .stat span{color:var(--muted);font-size:12px}
+  section{padding:6px 16px}
+  h2{font-size:15px;color:var(--muted);margin:18px 0 8px;display:flex;justify-content:space-between;align-items:center}
+  h2 button{background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;padding:4px}
+  .quick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tile{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;user-select:none;position:relative}
+  .tile .ic{font-size:24px}
+  .tile .t{font-weight:700;margin-top:6px}
+  .tile .d{color:var(--muted);font-size:12px;margin-top:2px}
+  .sel{border-color:var(--accent)!important;background:#16353c!important}
+  .check{position:absolute;top:10px;left:10px;width:22px;height:22px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;font-size:14px;color:transparent}
+  .sel .check{background:var(--accent);border-color:var(--accent);color:#fff}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:8px 12px;font-size:13px;cursor:pointer;user-select:none}
+  .chip small{color:var(--muted)}
+  .tools{display:flex;gap:8px;margin-bottom:10px}
+  .tools input,.tools select{background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit}
+  .tools input{flex:1;min-width:0}
+  .list{display:flex;flex-direction:column;gap:8px}
+  .row{display:flex;align-items:center;gap:12px;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 12px;cursor:pointer;user-select:none}
+  .row .flag{font-size:28px;line-height:1}
+  .row .name{flex:1;min-width:0}
+  .row .name b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .name span{color:var(--muted);font-size:12px}
+  .row .check{position:static}
+  .ping{font-weight:700;font-size:14px;direction:ltr}
+  .g{color:var(--good)} .m{color:var(--mid)} .r{color:var(--bad)}
+  .bar{position:fixed;bottom:0;left:0;right:0;background:rgba(15,20,22,.96);backdrop-filter:blur(8px);
+    border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+  .bar .info{font-size:13px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between}
+  .btns{display:flex;gap:10px}
+  .btn{flex:1;border:none;border-radius:999px;padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;color:#fff;background:var(--accent2)}
+  .btn.sec{background:#3a4448}
+  .btn:disabled{opacity:.4}
+  .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:10}
+  .sheet{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-radius:22px 22px 0 0;padding:10px 16px calc(20px + env(safe-area-inset-bottom));
+    max-height:85vh;overflow:auto;z-index:11;transform:translateY(105%);transition:transform .25s}
+  .sheet.open{transform:none}
+  .grab{width:44px;height:5px;border-radius:9px;background:#555;margin:0 auto 12px}
+  .sheet h3{margin:4px 0 6px;font-size:19px}
+  .sheet p{color:var(--muted);font-size:13px;margin:4px 0 12px;line-height:1.7}
+  .qrow{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+  .qrow .n{flex:1;font-size:14px}
+  .qrow button{border:none;border-radius:999px;padding:9px 14px;font-family:inherit;font-weight:700;cursor:pointer;color:#fff;background:var(--accent2);font-size:13px}
+  .qrow button.ghost{background:#3a4448}
+  .qrow.done{opacity:.55}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-120px);background:#24353a;border:1px solid var(--accent);
+    padding:12px 16px;border-radius:14px;z-index:20;transition:transform .25s;font-size:14px;max-width:92vw;text-align:center}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .empty{color:var(--muted);text-align:center;padding:40px 10px;line-height:1.9}
+  .note{color:var(--muted);font-size:12px;line-height:1.7;padding:6px 16px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛰️ سيرفراتي</h1>
+  <div class="sub" id="updated">جاري التحميل…</div>
+  <div class="stats">
+    <div class="stat"><b id="sAlive">—</b><span>سيرفر شغال</span></div>
+    <div class="stat"><b id="sCountries">—</b><span>دولة</span></div>
+    <div class="stat"><b id="sBest">—</b><span>أفضل بينج</span></div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="empty" id="loading">⏳ جاري تحميل السيرفرات…</div>
+</main>
+
+<div class="note">البينج هنا مقاس من سيرفرات GitHub (أمريكا/أوروبا)، فممكن يفرق عن جهازك. بعد الاستيراد اعمل <b>Ping All</b> في V2Box عشان تعرف الأسرع عندك.</div>
+
+<div class="bar">
+  <div class="info"><span id="selInfo">اختار اللي تحبه 👆</span><span id="selCount"></span></div>
+  <div class="btns">
+    <button class="btn" id="btnImport" disabled>استيراد في V2Box</button>
+    <button class="btn sec" id="btnCopy" disabled>نسخ الكونفيجات</button>
+  </div>
+</div>
+
+<div class="sheet-bg" id="bg"></div>
+
+<div class="sheet" id="sheetImport">
+  <div class="grab"></div>
+  <h3>استيراد كاشتراكات 🔄</h3>
+  <p>كل اختيار هيتضاف في V2Box كاشتراك لوحده وبيتحدث تلقائي. دوس <b>استيراد</b> على كل واحد، وبعد ما V2Box يضيفه ارجع هنا وكمّل اللي بعده. ولو الزرار مفتحش V2Box، انسخ الرابط وضيفه يدوي: <b>+ ← Add Subscription</b>.</p>
+  <div id="queue"></div>
+  <button class="btn sec" style="width:100%;margin-top:6px" id="copyAllLinks">نسخ كل روابط الاشتراك</button>
+</div>
+
+<div class="sheet" id="sheetCopy">
+  <div class="grab"></div>
+  <h3>نسخ الكونفيجات 📋</h3>
+  <p>هنجمع كل السيرفرات اللي اخترتها في نسخة واحدة. افتح V2Box ودوس <b>+ ← Import from clipboard</b>. النسخة دي ثابتة ومش بتتحدث لوحدها.</p>
+  <label style="font-size:14px">أقصى بينج: <b id="pingVal" style="direction:ltr;display:inline-block"></b></label>
+  <input type="range" id="pingRange" min="50" max="1500" step="25" value="1500">
+  <label style="font-size:14px;display:block;margin-top:10px">أقصى عدد: <b id="limVal"></b></label>
+  <input type="range" id="limRange" min="10" max="2000" step="10" value="300">
+  <p style="margin-top:12px">هيتنسخ <b id="copyCount">0</b> سيرفر</p>
+  <button class="btn" style="width:100%" id="doCopy">نسخ</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  // -------- إعدادات: بتتظبط لوحدها من رابط GitHub Pages --------
+  let OWNER = 'mmody1334-gif', REPO = 'v2-collector';
+  const h = location.hostname;
+  if (h.endsWith('.github.io')) {
+    OWNER = h.split('.')[0];
+    const seg = location.pathname.split('/').filter(Boolean)[0];
+    if (seg) REPO = seg;
+  }
+  const RAW = new URLSearchParams(location.search).get('raw') || `https://raw.githubusercontent.com/${OWNER}/${REPO}/subs/`;
+
+  const $ = s => document.querySelector(s);
+  const regionName = (() => {
+    try { const dn = new Intl.DisplayNames(['ar'], {type: 'region'}); return c => c === 'XX' ? 'غير معروف' : (dn.of(c) || c); }
+    catch { return c => c; }
+  })();
+  const pingClass = ms => ms < 150 ? 'g' : ms < 400 ? 'm' : 'r';
+  const PROTO_NAMES = {vless:'VLESS', vmess:'VMess', trojan:'Trojan', ss:'Shadowsocks', hysteria2:'Hysteria2', tuic:'TUIC'};
+
+  let DATA = null, CONFIGS = null;
+  const selected = new Map(); // id -> {id, name, file, kind, match}
+  let sortBy = 'ping', search = '';
+
+  function toast(msg) {
+    const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+  function timeAgo(iso) {
+    const m = Math.round((Date.now() - new Date(iso)) / 60000);
+    if (m < 1) return 'دلوقتي';
+    if (m < 60) return `من ${m} دقيقة`;
+    const hh = Math.round(m / 60);
+    return hh < 48 ? `من ${hh} ساعة` : `من ${Math.round(hh / 24)} يوم`;
+  }
+
+  async function load() {
+    try {
+      const r = await fetch(RAW + 'data.json?t=' + Date.now(), {cache: 'no-store'});
+      if (!r.ok) throw new Error(r.status);
+      DATA = await r.json();
+      render();
+    } catch (e) {
+      $('#main').innerHTML = `<div class="empty">⚠️ لسه مفيش بيانات.<br>لو لسه مشغّل المشروع، استنى أول تحديث يخلص (حوالي 10 دقايق) وارجع تاني.<br><small>${e}</small></div>`;
+      $('#updated').textContent = '';
+    }
+  }
+
+  function render() {
+    const d = DATA;
+    $('#updated').textContent = `آخر تحديث ${timeAgo(d.updated)} • بيتحدث كل 3 ساعات`;
+    $('#sAlive').textContent = d.stats.alive.toLocaleString('ar');
+    $('#sCountries').textContent = d.stats.countries.toLocaleString('ar');
+    const best = d.countries.length ? Math.min(...d.countries.map(c => c.best)) : 0;
+    $('#sBest').innerHTML = `<span style="direction:ltr;display:inline-block">${best}ms</span>`;
+
+    const main = $('#main');
+    main.innerHTML = `
+      <section>
+        <h2>اشتراكات سريعة</h2>
+        <div class="quick">
+          <div class="tile" data-id="fast"><div class="check">✓</div><div class="ic">⚡</div><div class="t">الأسرع</div><div class="d">أسرع ${d.files.fast} سيرفر من كل الدول</div></div>
+          <div class="tile" data-id="all"><div class="check">✓</div><div class="ic">🌍</div><div class="t">الكل</div><div class="d">${d.files.all.toLocaleString('ar')} سيرفر مترتبين بالبينج</div></div>
+        </div>
+      </section>
+      <section>
+        <h2>حسب البروتوكول</h2>
+        <div class="chips" id="protos"></div>
+      </section>
+      <section>
+        <h2><span>حسب الدولة (${d.countries.length})</span><button id="selAllCountries">تحديد كل الدول</button></h2>
+        <div class="tools">
+          <input id="q" placeholder="🔎 ابحث عن دولة…" value="${search}">
+          <select id="sort"><option value="ping">الأقل بينج</option><option value="count">الأكثر سيرفرات</option><option value="name">الاسم</option></select>
+        </div>
+        <div class="list" id="countries"></div>
+      </section>`;
+
+    $('#protos').innerHTML = d.protocols.map(p =>
+      `<div class="chip" data-id="p:${p.name}">${PROTO_NAMES[p.name] || p.name} <small>${p.total}</small></div>`).join('');
+    $('#sort').value = sortBy;
+    $('#q').oninput = e => { search = e.target.value.trim(); renderCountries(); };
+    $('#sort').onchange = e => { sortBy = e.target.value; renderCountries(); };
+    $('#selAllCountries').onclick = () => {
+      const all = d.countries.every(c => selected.has('c:' + c.code));
+      d.countries.forEach(c => all ? selected.delete('c:' + c.code) : selected.set('c:' + c.code, itemFor('c:' + c.code)));
+      refresh();
+    };
+    main.onclick = e => {
+      const el = e.target.closest('[data-id]');
+      if (!el) return;
+      const id = el.dataset.id;
+      selected.has(id) ? selected.delete(id) : selected.set(id, itemFor(id));
+      refresh();
+    };
+    renderCountries();
+    refresh();
+  }
+
+  function renderCountries() {
+    let list = DATA.countries.slice();
+    if (search) list = list.filter(c => regionName(c.code).includes(search) || c.code.toLowerCase().includes(search.toLowerCase()));
+    if (sortBy === 'count') list.sort((a, b) => b.total - a.total);
+    else if (sortBy === 'name') list.sort((a, b) => regionName(a.code).localeCompare(regionName(b.code), 'ar'));
+    $('#countries').innerHTML = list.map(c => `
+      <div class="row" data-id="c:${c.code}">
+        <div class="check">✓</div>
+        <div class="flag">${c.flag}</div>
+        <div class="name"><b>${regionName(c.code)}</b><span>${c.total} سيرفر • ${c.protocols.map(p => PROTO_NAMES[p] || p).join('، ')}</span></div>
+        <div class="ping ${pingClass(c.best)}">${c.best}ms</div>
+      </div>`).join('') || '<div class="empty">مفيش نتائج</div>';
+    refresh();
+  }
+
+  function itemFor(id) {
+    if (id === 'fast') return {id, name: '⚡ الأسرع', file: 'fast.txt', match: () => true, top: DATA.files.fast};
+    if (id === 'all') return {id, name: '🌍 الكل', file: 'all.txt', match: () => true};
+    if (id.startsWith('p:')) { const p = id.slice(2); return {id, name: '🔐 ' + (PROTO_NAMES[p] || p), file: `protocol/${p}.txt`, match: r => r[2] === p}; }
+    const cc = id.slice(2), c = DATA.countries.find(x => x.code === cc);
+    return {id, name: `${c ? c.flag : ''} ${regionName(cc)}`, file: `country/${cc}.txt`, match: r => r[1] === cc};
+  }
+
+  function refresh() {
+    document.querySelectorAll('[data-id]').forEach(el => el.classList.toggle('sel', selected.has(el.dataset.id)));
+    const n = selected.size;
+    $('#btnImport').disabled = $('#btnCopy').disabled = !n;
+    $('#selInfo').textContent = n ? [...selected.values()].map(s => s.name).slice(0, 4).join('، ') + (n > 4 ? ' …' : '') : 'اختار اللي تحبه 👆';
+    $('#selCount').textContent = n ? `${n} مختار` : '';
+    const b = $('#selAllCountries');
+    if (b && DATA) b.textContent = DATA.countries.every(c => selected.has('c:' + c.code)) ? 'إلغاء تحديد الدول' : 'تحديد كل الدول';
+  }
+
+  // -------- sheets --------
+  function openSheet(id) { $('#bg').style.display = 'block'; requestAnimationFrame(() => $(id).classList.add('open')); }
+  function closeSheets() { document.querySelectorAll('.sheet').forEach(s => s.classList.remove('open')); $('#bg').style.display = 'none'; }
+  $('#bg').onclick = closeSheets;
+
+  const subUrl = it => RAW + it.file;
+  const deepLink = it => `v2box://install-sub?url=${encodeURIComponent(subUrl(it))}&name=${encodeURIComponent(it.name.trim())}`;
+
+  async function copyText(txt) {
+    try { await navigator.clipboard.writeText(txt); return true; }
+    catch {
+      const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta);
+      ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok;
+    }
+  }
+
+  $('#btnImport').onclick = () => {
+    const items = [...selected.values()];
+    $('#queue').innerHTML = items.map((it, i) => `
+      <div class="qrow" id="q${i}">
+        <div class="n">${it.name}</div>
+        <button class="ghost" data-copy="${i}">نسخ الرابط</button>
+        <button data-go="${i}">استيراد</button>
+      </div>`).join('');
+    $('#queue').onclick = async e => {
+      const go = e.target.dataset.go, cp = e.target.dataset.copy;
+      if (go !== undefined) { $('#q' + go).classList.add('done'); e.target.textContent = '✓ تم'; location.href = deepLink(items[go]); }
+      if (cp !== undefined) { await copyText(subUrl(items[cp])); toast('اتنسخ رابط الاشتراك ✅'); }
+    };
+    $('#copyAllLinks').onclick = async () => { await copyText(items.map(subUrl).join('\n')); toast(`اتنسخ ${items.length} رابط ✅`); };
+    if (items.length === 1) { location.href = deepLink(items[0]); }
+    openSheet('#sheetImport');
+  };
+
+  // -------- copy configs --------
+  async function ensureConfigs() {
+    if (CONFIGS) return CONFIGS;
+    toast('جاري تحميل الكونفيجات…');
+    const r = await fetch(RAW + 'configs.json?t=' + Date.now(), {cache: 'no-store'});
+    CONFIGS = await r.json(); // [link, cc, proto, ms] مترتبين بالبينج
+    return CONFIGS;
+  }
+  function pickConfigs() {
+    const items = [...selected.values()];
+    const maxPing = +$('#pingRange').value, lim = +$('#limRange').value;
+    const fastSet = items.some(i => i.id === 'fast') ? new Set(CONFIGS.slice(0, DATA.files.fast).map(r => r[0])) : null;
+    const out = [];
+    for (const r of CONFIGS) {
+      if (r[3] > maxPing) continue;
+      if (items.some(it => it.id === 'fast' ? fastSet.has(r[0]) : it.match(r))) out.push(r[0]);
+      if (out.length >= lim) break;
+    }
+    return out;
+  }
+  function updCopy() {
+    $('#pingVal').textContent = $('#pingRange').value + 'ms';
+    $('#limVal').textContent = $('#limRange').value;
+    if (CONFIGS) $('#copyCount').textContent = pickConfigs().length;
+  }
+  $('#pingRange').oninput = $('#limRange').oninput = updCopy;
+  $('#btnCopy').onclick = async () => {
+    openSheet('#sheetCopy'); updCopy();
+    try { await ensureConfigs(); updCopy(); } catch { toast('⚠️ فشل تحميل الكونفيجات'); }
+  };
+  $('#doCopy').onclick = async () => {
+    await ensureConfigs();
+    const list = pickConfigs();
+    if (!list.length) return toast('مفيش سيرفرات بالفلتر ده');
+    await copyText(list.join('\n'));
+    toast(`اتنسخ ${list.length} سيرفر ✅ — افتح V2Box واعمل Import from clipboard`);
+    closeSheets();
+  };
+
+  load();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+# مصادر السيرفرات المجانية — لينك واحد في كل سطر (نص عادي أو Base64)
+# تقدر تضيف أو تشيل أي مصدر، والسطر اللي يبدأ بـ # بيتجاهل
+
+https://raw.githubusercontent.com/barry-far/V2ray-Config/main/All_Configs_Sub.txt
+https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt
+https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/all_sub.txt
+https://raw.githubusercontent.com/ebrasha/free-v2ray-public-list/main/all_extracted_configs.txt
+https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge.txt
+https://raw.githubusercontent.com/soroushmirzaei/telegram-configs-collector/main/splitted/mixed
+https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/master/collected-proxies/row-url/all.txt
+https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_BASE64.txt
+https://raw.githubusercontent.com/Leon406/SubCrawler/main/sub/share/vless
+https://raw.githubusercontent.com/Leon406/SubCrawler/main/sub/share/all3
+https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray
+https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2
+https://raw.githubusercontent.com/ermaozi/get_subscribe/main/subscribe/v2ray.txt
+https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list_raw.txt
+https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub
+https://raw.githubusercontent.com/vorz1k/v2box/main/supreme_vpns_1.txt
+https://raw.githubusercontent.com/vorz1k/v2box/main/supreme_vpns_2.txt
