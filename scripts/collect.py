@@ -148,13 +148,22 @@ def parse(link):
         main = body.split("#", 1)[0]
         if proto == "ss":
             netpart = main.split("?", 1)[0].split("/", 1)[0]
+            if "@" in netpart:  # توحيد الشكل عشان المكرر يتشال
+                ui = urllib.parse.unquote(netpart.rsplit("@", 1)[0])
+                if ":" not in ui:
+                    ui = b64decode_loose(ui).decode("utf-8", "ignore")
+                if ":" not in ui:
+                    return None
+                hp = netpart.rsplit("@", 1)[1]
+                main = ui + "@" + hp
+                link = "ss://" + base64.urlsafe_b64encode(ui.encode()).decode().rstrip("=") + "@" + hp
             if "@" not in netpart:  # ss://BASE64(method:pass@host:port)
                 dec = b64decode_loose(netpart).decode("utf-8", "ignore")
                 if "@" not in dec:
                     return None
                 netpart = dec
                 main = dec
-                link = "ss://" + base64.b64encode(dec.split("@")[0].encode()).decode() + "@" + dec.rsplit("@", 1)[1]
+                link = "ss://" + base64.urlsafe_b64encode(dec.rsplit("@", 1)[0].encode()).decode().rstrip("=") + "@" + dec.rsplit("@", 1)[1]
             host, port = _host_port(netpart)
         else:
             netloc = urllib.parse.urlsplit(link).netloc

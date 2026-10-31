@@ -137,6 +137,8 @@ def to_outbound(cfg, tag):
         if not ui:
             raise ValueError("no user")
         if p == "vless":
+            if st.get("security") == "none":
+                raise ValueError("plain vless (refused by new Xray)")
             if (q.get("encryption") or "none") != "none":
                 raise ValueError("vless encryption")
             user = {"id": ui, "encryption": "none"}
@@ -185,39 +187,54 @@ def build_config(items):
             "routing": {"rules": rules}, "dns": {"servers": ["1.1.1.1", "8.8.8.8"]}}
 
 
-async def _probe(port, ctx):
+async def _socks_http(port, host, path, timeout):
+    """طلب HTTP بسيط من خلال SOCKS5 بتاع Xray — يرجع (status, body)"""
     loop = asyncio.get_running_loop()
-    t0 = time.perf_counter()
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setblocking(False)
     try:
         await loop.sock_connect(s, ("127.0.0.1", port))
         await loop.sock_sendall(s, b"\x05\x01\x00")
-        r = await loop.sock_recv(s, 2)
-        if r != b"\x05\x00":
+        if await loop.sock_recv(s, 2) != b"\x05\x00":
             raise OSError("socks auth")
-        host = TRACE_HOST.encode()
-        await loop.sock_sendall(s, b"\x05\x01\x00\x03" + bytes([len(host)]) + host + (443).to_bytes(2, "big"))
+        hb = host.encode()
+        await loop.sock_sendall(s, b"\x05\x01\x00\x03" + bytes([len(hb)]) + hb + (80).to_bytes(2, "big"))
         r = await loop.sock_recv(s, 10)
         if len(r) < 2 or r[1] != 0:
             raise OSError("socks connect")
-        reader, writer = await asyncio.open_connection(sock=s, ssl=ctx, server_hostname=TRACE_HOST)
-        writer.write(f"GET {TRACE_PATH} HTTP/1.1\r\nHost: {TRACE_HOST}\r\nUser-Agent: curl/8\r\nConnection: close\r\n\r\n".encode())
-        await writer.drain()
-        data = await reader.read(4096)
-        ms = int((time.perf_counter() - t0) * 1000)
-        writer.close()
+        await loop.sock_sendall(s, f"GET {path} HTTP/1.1\r\nHost: {host}\r\nUser-Agent: curl/8\r\nConnection: close\r\n\r\n".encode())
+        data = b""
+        while len(data) < 8192:
+            chunk = await asyncio.wait_for(loop.sock_recv(s, 4096), timeout)
+            if not chunk:
+                break
+            data += chunk
         text = data.decode("utf-8", "ignore")
-        if " 200 " not in text.split("\r\n", 1)[0]:
+        head, _, body = text.partition("\r\n\r\n")
+        parts = head.split(" ", 2)
+        return (int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 0), body
+    finally:
+        s.close()
+
+
+async def _probe(port, ctx=None):
+    try:
+        t0 = time.perf_counter()
+        st, _ = await _socks_http(port, "www.gstatic.com", "/generate_204", REQ_TIMEOUT)
+        if st != 204:
             return None
-        info = dict(l.split("=", 1) for l in text.split("\r\n\r\n", 1)[-1].splitlines() if "=" in l)
-        return ms, info.get("loc"), info.get("ip")
+        ms = int((time.perf_counter() - t0) * 1000)
     except Exception:
-        try:
-            s.close()
-        except Exception:
-            pass
         return None
+    ip = None
+    try:  # IP الخروج الحقيقي (من Amazon مش Cloudflare)
+        st, body = await asyncio.wait_for(_socks_http(port, "checkip.amazonaws.com", "/", 6), 7)
+        cand = body.strip().split()[0] if st == 200 and body.strip() else ""
+        socket.inet_pton(socket.AF_INET6 if ":" in cand else socket.AF_INET, cand)
+        ip = cand
+    except Exception:
+        pass
+    return ms, None, ip
 
 
 async def _probe_all(n):
@@ -227,7 +244,7 @@ async def _probe_all(n):
     async def one(i):
         async with sem:
             try:
-                return await asyncio.wait_for(_probe(BASE_PORT + i, ctx), REQ_TIMEOUT)
+                return await asyncio.wait_for(_probe(BASE_PORT + i, ctx), REQ_TIMEOUT + 8)
             except Exception:
                 return None
     return await asyncio.gather(*(one(i) for i in range(n)))
