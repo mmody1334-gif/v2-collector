@@ -6,6 +6,7 @@ import asyncio
 import base64
 import json
 import os
+import re
 import socket
 import ssl
 import subprocess
@@ -211,11 +212,30 @@ async def _socks_http(port, host, path, timeout):
             raise OSError("socks connect")
         await loop.sock_sendall(s, f"GET {path} HTTP/1.1\r\nHost: {host}\r\nUser-Agent: curl/8\r\nConnection: close\r\n\r\n".encode())
         data = b""
+        need = None
         while len(data) < 8192:
-            chunk = await asyncio.wait_for(loop.sock_recv(s, 4096), timeout)
+            try:
+                chunk = await asyncio.wait_for(loop.sock_recv(s, 4096), timeout)
+            except (ConnectionResetError, BrokenPipeError):
+                if b"\r\n\r\n" in data:
+                    break  # البيانات وصلت والسيرفر قفل بـ reset — عادي
+                raise
             if not chunk:
                 break
             data += chunk
+            if b"\r\n\r\n" in data:
+                head_b, _, body_b = data.partition(b"\r\n\r\n")
+                if need is None:
+                    m = re.search(rb"(?i)content-length:\s*(\d+)", head_b)
+                    code = head_b.split(b" ", 2)[1:2]
+                    if code == [b"204"]:
+                        need = 0
+                    elif m:
+                        need = int(m.group(1))
+                    else:
+                        need = -1
+                if need >= 0 and len(body_b) >= need:
+                    break  # خلصنا من غير ما نستنى قفل الاتصال
         text = data.decode("utf-8", "ignore")
         head, _, body = text.partition("\r\n\r\n")
         parts = head.split(" ", 2)
