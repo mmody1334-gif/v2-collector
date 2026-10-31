@@ -100,12 +100,12 @@ def fetch_all(urls):
 
 # ---------------------------------------------------------------- parsing
 class Config:
-    __slots__ = ("proto", "host", "port", "raw", "key", "vmess", "ip", "cc", "ms", "exit_ip")
+    __slots__ = ("proto", "host", "port", "raw", "key", "vmess", "ip", "cc", "ms", "exit_ip", "clean")
 
     def __init__(self, proto, host, port, raw, key, vmess=None):
         self.proto, self.host, self.port = proto, host, port
         self.raw, self.key, self.vmess = raw, key, vmess
-        self.ip = self.cc = self.ms = self.exit_ip = None
+        self.ip = self.cc = self.ms = self.exit_ip = self.clean = None
 
     def with_remark(self, remark):
         if self.proto == "vmess":
@@ -243,6 +243,30 @@ async def tcp_ping_all(targets):
     return out
 
 
+# ---------------------------------------------------------------- reputation
+def check_reputation(ips):
+    """ip-api.com batch: {ip: True لو نظيف (مش VPN/بروكسي/داتا سنتر)}. حد 15 طلب/دقيقة."""
+    out = {}
+    ips = list(ips)
+    for i in range(0, len(ips), 100):
+        chunk = ips[i:i + 100]
+        body = json.dumps([{"query": ip, "fields": "query,proxy,hosting,status"} for ip in chunk]).encode()
+        for attempt in range(3):
+            try:
+                req = urllib.request.Request("http://ip-api.com/batch", data=body,
+                                             headers={"Content-Type": "application/json"})
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    for row in json.loads(r.read()):
+                        if row.get("status") == "success":
+                            out[row["query"]] = not (row.get("proxy") or row.get("hosting"))
+                break
+            except Exception as e:
+                log(f"   reputation retry: {e}")
+                time.sleep(10)
+        time.sleep(4.2)
+    return out
+
+
 # ---------------------------------------------------------------- output
 def flag(cc):
     if not cc or len(cc) != 2 or not cc.isalpha():
@@ -341,6 +365,12 @@ def main():
             c.cc = geo.country(c.ip) or "XX"
             alive.append(c)
     alive.sort(key=lambda c: c.ms)
+
+    log("⑥ فحص سمعة الـ IP (VPN/داتا سنتر)…")
+    rep = check_reputation({c.exit_ip or c.ip for c in alive})
+    for c in alive:
+        c.clean = rep.get(c.exit_ip or c.ip)
+    log(f"   نظيف: {sum(1 for c in alive if c.clean)} من {len(alive)}")
     log(f"   سيرفرات شغالة: {len(alive)}")
 
     # تسمية كل سيرفر: 🇩🇪 DE 12 | 85ms | vless
@@ -348,7 +378,8 @@ def main():
     final = {}
     for c in alive:
         counters[c.cc] = counters.get(c.cc, 0) + 1
-        remark = f"{flag(c.cc)} {c.cc} {counters[c.cc]} | {c.ms}ms | {c.proto}"
+        mark = " 🏠" if c.clean else ""
+        remark = f"{flag(c.cc)} {c.cc} {counters[c.cc]}{mark} | {c.ms}ms | {c.proto}"
         final[id(c)] = c.with_remark(remark)
 
     out = args.out
@@ -363,6 +394,10 @@ def main():
     files = {}
     files["all"] = emit("all.txt", alive[:ALL_LIMIT])
     files["fast"] = emit("fast.txt", alive[:FAST_LIMIT])
+    clean_list = [c for c in alive if c.clean]
+    files["clean"] = emit("clean.txt", clean_list[:ALL_LIMIT])
+    # نفس توقيت عُمان (GMT+4) = المواقع متكشفش فرق التوقيت
+    files["gulf4"] = emit("gulf4.txt", [c for c in alive if c.cc in ("AE", "OM")][:ALL_LIMIT])
 
     by_cc, by_proto = {}, {}
     for c in alive:
@@ -376,6 +411,7 @@ def main():
         countries.append({
             "code": cc, "flag": flag(cc), "count": n, "total": len(items),
             "best": min(ms), "avg": int(sum(ms) / len(ms)),
+            "clean": sum(1 for c in items if c.clean),
             "protocols": sorted({c.proto for c in items}),
         })
     countries.sort(key=lambda x: (x["code"] == "XX", x["best"]))
@@ -396,7 +432,7 @@ def main():
         "duration_sec": int(time.time() - t_start),
         "stats": {
             "raw": len(raw_links), "unique": len(uniq), "tested": len(targets), "tcp_alive": len(tcp_alive),
-            "alive": len(alive), "countries": len([c for c in countries if c["code"] != "XX"]),
+            "alive": len(alive), "clean": len(clean_list), "countries": len([c for c in countries if c["code"] != "XX"]),
         },
         "files": files,
         "countries": countries,
