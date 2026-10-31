@@ -37,7 +37,8 @@ FAST_LIMIT = 300          # عدد السيرفرات في ملف "الأسرع"
 COUNTRY_LIMIT = 200       # أقصى عدد لكل دولة
 PROTOCOL_LIMIT = 1000     # أقصى عدد لكل بروتوكول
 CONCURRENCY = 600
-REAL_MAX = 30000           # أقصى عدد يتعمله اختبار حقيقي عبر Xray
+PRIORITY_COUNTRIES = {"EG", "SA", "AE", "OM", "QA", "KW", "BH", "JO", "IQ", "LB", "MA", "TN", "DZ"}
+REAL_MAX = 45000           # أقصى عدد يتعمله اختبار حقيقي عبر Xray
 REAL_MAX_DELAY = 5000     # أقصى real delay مقبول (ms)
 
 
@@ -309,10 +310,23 @@ def main():
 
     if args.xray:
         log("⑤ اختبار حقيقي عبر Xray (real delay + دولة الخروج)…")
+        # مصر والخليج الأول عشان مايتقطعوش لو الوقت خلص
+        def prio(c):
+            cc = cc_entry.get(c.ip)
+            return (0 if cc in PRIORITY_COUNTRIES else 1, c.ms)
+        cc_entry = {c.ip: geo.country(c.ip) for c in tcp_alive}
+        tcp_alive.sort(key=prio)
+        found = {}
+        for c in tcp_alive:
+            cc = cc_entry.get(c.ip)
+            if cc in PRIORITY_COUNTRIES:
+                found[cc] = found.get(cc, 0) + 1
+        log(f"   سيرفرات مصر/الخليج قبل الاختبار: {found}")
         cand = tcp_alive[:REAL_MAX]
         for c in cand:
             c.ms = None
         diag = realtest.real_test(args.xray, cand, log)
+        diag["priority_candidates"] = found
         alive = [c for c in cand if c.ms is not None and c.ms <= REAL_MAX_DELAY]
         for c in alive:
             if not c.cc or len(c.cc) != 2 or c.cc in ("T1", "XX"):

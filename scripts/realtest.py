@@ -27,7 +27,7 @@ REASONS = {}
 def _why(k):
     REASONS[k] = REASONS.get(k, 0) + 1
 
-MAX_SECONDS = 38 * 60     # أقصى وقت للاختبار الحقيقي
+MAX_SECONDS = 45 * 60     # أقصى وقت للاختبار الحقيقي
 
 
 def _q(link):

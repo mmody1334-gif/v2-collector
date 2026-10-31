@@ -18,3 +18,25 @@ https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list_raw.txt
 https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub
 https://raw.githubusercontent.com/vorz1k/v2box/main/supreme_vpns_1.txt
 https://raw.githubusercontent.com/vorz1k/v2box/main/supreme_vpns_2.txt
+
+# --- مصادر إضافية كبيرة ---
+https://raw.githubusercontent.com/Alirewa/V2ray-Configs/main/config.txt
+https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/all/configs.txt
+https://raw.githubusercontent.com/DukeMehdi/FreeList-V2ray-Configs/refs/heads/main/Configs/All-DukeMehdi-Configs.txt
+https://raw.githubusercontent.com/Danialsamadi/v2go/main/AllConfigsSub.txt
+https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/super-sub.txt
+https://raw.githubusercontent.com/ebrasha/free-v2ray-public-list/refs/heads/main/V2Ray-Config-By-EbraSha-All-Type.txt
+https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/refs/heads/main/config/all_configs.txt
+https://raw.githubusercontent.com/geek-spot/Free-Config/main/all
+https://raw.githubusercontent.com/barry-far/V2ray-Config/main/Splitted-By-Protocol/trojan.txt
+https://raw.githubusercontent.com/barry-far/V2ray-Config/main/Splitted-By-Protocol/ss.txt
+
+# --- مصر والخليج (ملفات متقسمة حسب الدولة) ---
+https://raw.githubusercontent.com/Danialsamadi/v2go/main/Splitted-By-Country/EG.txt
+https://raw.githubusercontent.com/Danialsamadi/v2go/main/Splitted-By-Country/SA.txt
+https://raw.githubusercontent.com/Danialsamadi/v2go/main/Splitted-By-Country/AE.txt
+https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Country/EG.txt
+https://raw.githubusercontent.com/miladtahanian/V2RayScrapeByCountry/main/Countries/Egypt.txt
+https://raw.githubusercontent.com/miladtahanian/V2RayScrapeByCountry/main/output_configs/Egypt.txt
+https://raw.githubusercontent.com/PENZA84/V2RayScrapeByCountry/main/Countries/Egypt.txt
+https://raw.githubusercontent.com/PENZA84/V2RayScrapeByCountry/main/output_configs/Egypt.txt
