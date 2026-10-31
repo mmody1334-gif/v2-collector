@@ -37,7 +37,7 @@ FAST_LIMIT = 300          # عدد السيرفرات في ملف "الأسرع"
 COUNTRY_LIMIT = 200       # أقصى عدد لكل دولة
 PROTOCOL_LIMIT = 1000     # أقصى عدد لكل بروتوكول
 CONCURRENCY = 600
-REAL_MAX = 12000           # أقصى عدد يتعمله اختبار حقيقي عبر Xray
+REAL_MAX = 30000           # أقصى عدد يتعمله اختبار حقيقي عبر Xray
 REAL_MAX_DELAY = 5000     # أقصى real delay مقبول (ms)
 
 

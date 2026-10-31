@@ -19,14 +19,15 @@ TRACE_PATH = "/cdn-cgi/trace"
 BASE_PORT = 21000
 BATCH = 400
 REQ_TIMEOUT = 8.0
-PARALLEL = 120            # طلبات متزامنة جوه كل دفعة
+ALLOW_INSECURE = os.environ.get("XRAY_LEGACY", "1") == "1"  # Xray < 26 بيقبل allowInsecure
+PARALLEL = 150            # طلبات متزامنة جوه كل دفعة
 REASONS = {}
 
 
 def _why(k):
     REASONS[k] = REASONS.get(k, 0) + 1
 
-MAX_SECONDS = 25 * 60     # أقصى وقت للاختبار الحقيقي
+MAX_SECONDS = 38 * 60     # أقصى وقت للاختبار الحقيقي
 
 
 def _q(link):
@@ -66,6 +67,8 @@ def _stream(net, security, host, path, sni, fp, alpn, pbk=None, sid=None, spx=No
             t["fingerprint"] = fp if fp.lower() in FPS else "chrome"
         if alpn:
             t["alpn"] = [a for a in alpn.split(",") if a]
+        if allow_insecure and ALLOW_INSECURE:
+            t["allowInsecure"] = True
         s["security"] = "tls"
         s["tlsSettings"] = t
     elif security == "reality":
@@ -143,8 +146,6 @@ def to_outbound(cfg, tag):
         if not ui:
             raise ValueError("no user")
         if p == "vless":
-            if st.get("security") == "none":
-                raise ValueError("plain vless (refused by new Xray)")
             if (q.get("encryption") or "none") != "none":
                 raise ValueError("vless encryption")
             user = {"id": ui, "encryption": "none"}

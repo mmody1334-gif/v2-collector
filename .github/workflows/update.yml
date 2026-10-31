@@ -18,7 +18,7 @@ concurrency:
 jobs:
   collect:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
 
@@ -29,9 +29,15 @@ jobs:
       - name: Download GeoIP database
         run: curl -sSL --retry 3 -o Country.mmdb https://github.com/P3TERX/GeoLite.mmdb/releases/latest/download/GeoLite2-Country.mmdb
 
+      # نسخة قبل 26 عشان تقبل allowInsecure و VLESS من غير TLS (شائعين في السيرفرات المجانية)
       - name: Download Xray-core
+        env:
+          XRAY_VERSION: v25.3.6
         run: |
-          curl -sSL --retry 3 -o xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          if ! curl -fsSL --retry 3 -o xray.zip "https://github.com/XTLS/Xray-core/releases/download/${XRAY_VERSION}/Xray-linux-64.zip"; then
+            echo "fallback to latest"; echo "XRAY_LEGACY=0" >> $GITHUB_ENV
+            curl -fsSL --retry 3 -o xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          fi
           mkdir -p xray && unzip -q -o xray.zip -d xray && chmod +x xray/xray && ./xray/xray version | head -1
 
       - name: Collect, test & split
