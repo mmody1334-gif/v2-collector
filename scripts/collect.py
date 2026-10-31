@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mmdb  # noqa: E402
+import realtest  # noqa: E402
 
 PROTOCOLS = ("vmess", "vless", "trojan", "ss", "hysteria2", "hy2", "tuic")
 LINK_RE = re.compile(r"(?:vmess|vless|trojan|ss|hysteria2|hy2|tuic)://[^\s\"'<>`]+", re.I)
@@ -36,6 +37,8 @@ FAST_LIMIT = 300          # عدد السيرفرات في ملف "الأسرع"
 COUNTRY_LIMIT = 200       # أقصى عدد لكل دولة
 PROTOCOL_LIMIT = 1000     # أقصى عدد لكل بروتوكول
 CONCURRENCY = 600
+REAL_MAX = 16000           # أقصى عدد يتعمله اختبار حقيقي عبر Xray
+REAL_MAX_DELAY = 5000     # أقصى real delay مقبول (ms)
 
 
 def log(*a):
@@ -96,12 +99,12 @@ def fetch_all(urls):
 
 # ---------------------------------------------------------------- parsing
 class Config:
-    __slots__ = ("proto", "host", "port", "raw", "key", "vmess", "ip", "cc", "ms")
+    __slots__ = ("proto", "host", "port", "raw", "key", "vmess", "ip", "cc", "ms", "exit_ip")
 
     def __init__(self, proto, host, port, raw, key, vmess=None):
         self.proto, self.host, self.port = proto, host, port
         self.raw, self.key, self.vmess = raw, key, vmess
-        self.ip = self.cc = self.ms = None
+        self.ip = self.cc = self.ms = self.exit_ip = None
 
     def with_remark(self, remark):
         if self.proto == "vmess":
@@ -249,6 +252,7 @@ def main():
     ap.add_argument("--sources", default="sources.txt")
     ap.add_argument("--mmdb", default="Country.mmdb")
     ap.add_argument("--out", default="out")
+    ap.add_argument("--xray", help="مسار Xray-core للاختبار الحقيقي (من غيره بيستخدم TCP بس)")
     ap.add_argument("--links-file", help="(للتجربة) ملف فيه لينكات بدل التحميل")
     args = ap.parse_args()
     t_start = time.time()
@@ -284,19 +288,35 @@ def main():
     pings = asyncio.run(tcp_ping_all(targets))
     log(f"   شغال: {len(pings)}/{len(targets)} عنوان")
 
-    log("⑤ تحديد الدول…")
     geo = mmdb.Reader(args.mmdb)
-    cc_cache = {}
-    alive = []
+    tcp_alive = []
     for c in configs:
         ms = pings.get((c.ip, c.port))
-        if ms is None or ms > MAX_PING:
-            continue
-        c.ms = ms
-        if c.ip not in cc_cache:
-            cc_cache[c.ip] = geo.country(c.ip) or "XX"
-        c.cc = cc_cache[c.ip]
-        alive.append(c)
+        if ms is not None:
+            c.ms = ms
+            tcp_alive.append(c)
+    tcp_alive.sort(key=lambda c: c.ms)
+    diag = None
+
+    if args.xray:
+        log("⑤ اختبار حقيقي عبر Xray (real delay + دولة الخروج)…")
+        cand = tcp_alive[:REAL_MAX]
+        for c in cand:
+            c.ms = None
+        diag = realtest.real_test(args.xray, cand, log)
+        alive = [c for c in cand if c.ms is not None and c.ms <= REAL_MAX_DELAY]
+        for c in alive:
+            if not c.cc or len(c.cc) != 2 or c.cc in ("T1", "XX"):
+                c.cc = geo.country(c.exit_ip or c.ip) if (c.exit_ip or c.ip) else None
+            c.cc = c.cc or "XX"
+    else:
+        log("⑤ تحديد الدول (GeoIP)…")
+        alive = []
+        for c in tcp_alive:
+            if c.ms > MAX_PING:
+                continue
+            c.cc = geo.country(c.ip) or "XX"
+            alive.append(c)
     alive.sort(key=lambda c: c.ms)
     log(f"   سيرفرات شغالة: {len(alive)}")
 
@@ -352,13 +372,15 @@ def main():
         "updated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "duration_sec": int(time.time() - t_start),
         "stats": {
-            "raw": len(raw_links), "unique": len(uniq), "tested": len(targets),
+            "raw": len(raw_links), "unique": len(uniq), "tested": len(targets), "tcp_alive": len(tcp_alive),
             "alive": len(alive), "countries": len([c for c in countries if c["code"] != "XX"]),
         },
         "files": files,
         "countries": countries,
         "protocols": protocols,
         "sources": src_stats,
+        "test_mode": "real" if args.xray else "tcp",
+        "real_test": diag,
     }
     with open(os.path.join(out, "data.json"), "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
