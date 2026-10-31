@@ -17,7 +17,8 @@ TRACE_HOST = "www.cloudflare.com"
 TRACE_PATH = "/cdn-cgi/trace"
 BASE_PORT = 21000
 BATCH = 400
-REQ_TIMEOUT = 10.0
+REQ_TIMEOUT = 8.0
+MAX_SECONDS = 25 * 60     # أقصى وقت للاختبار الحقيقي
 
 
 def _q(link):
@@ -27,6 +28,19 @@ def _q(link):
 def _userinfo(link):
     netloc = urllib.parse.urlsplit(link).netloc
     return urllib.parse.unquote(netloc.rsplit("@", 1)[0]) if "@" in netloc else ""
+
+
+FPS = {"chrome", "firefox", "safari", "ios", "android", "edge", "360", "qq", "random", "randomized", "randomizednoalpn"}
+FLOWS = {"xtls-rprx-vision", "xtls-rprx-vision-udp443"}
+XHTTP_MODES = {"auto", "packet-up", "stream-up", "stream-one"}
+SS_METHODS = {"aes-128-gcm", "aes-256-gcm", "chacha20-poly1305", "chacha20-ietf-poly1305",
+              "xchacha20-poly1305", "xchacha20-ietf-poly1305", "none", "plain",
+              "2022-blake3-aes-128-gcm", "2022-blake3-aes-256-gcm", "2022-blake3-chacha20-poly1305"}
+
+
+def _b64len(v):
+    v = v.replace("-", "+").replace("_", "/")
+    return len(base64.b64decode(v + "=" * (-len(v) % 4)))
 
 
 def _stream(net, security, host, path, sni, fp, alpn, pbk=None, sid=None, spx=None,
@@ -41,7 +55,7 @@ def _stream(net, security, host, path, sni, fp, alpn, pbk=None, sid=None, spx=No
     if security in ("tls", "xtls"):
         t = {"serverName": sni or host or ""}
         if fp:
-            t["fingerprint"] = fp
+            t["fingerprint"] = fp if fp.lower() in FPS else "chrome"
         if alpn:
             t["alpn"] = [a for a in alpn.split(",") if a]
         if allow_insecure:
@@ -49,8 +63,12 @@ def _stream(net, security, host, path, sni, fp, alpn, pbk=None, sid=None, spx=No
         s["security"] = "tls"
         s["tlsSettings"] = t
     elif security == "reality":
-        if not pbk:
-            raise ValueError("reality without pbk")
+        if not pbk or _b64len(pbk) != 32:
+            raise ValueError("bad reality pbk")
+        if sid and (len(sid) > 16 or any(ch not in "0123456789abcdefABCDEF" for ch in sid)):
+            raise ValueError("bad shortId")
+        if fp and fp.lower() not in FPS:
+            fp = "chrome"
         s["security"] = "reality"
         s["realitySettings"] = {"serverName": sni or "", "fingerprint": fp or "chrome",
                                 "publicKey": pbk, "shortId": sid or "", "spiderX": spx or ""}
@@ -75,7 +93,7 @@ def _stream(net, security, host, path, sni, fp, alpn, pbk=None, sid=None, spx=No
         xh = {"path": path}
         if host:
             xh["host"] = host
-        if mode:
+        if mode in XHTTP_MODES:
             xh["mode"] = mode
         s["xhttpSettings"] = xh
     elif net == "tcp" and header == "http":
@@ -84,6 +102,8 @@ def _stream(net, security, host, path, sni, fp, alpn, pbk=None, sid=None, spx=No
     elif net in ("tcp", "raw"):
         s["network"] = "tcp"
     elif net == "kcp":
+        if header not in (None, "", "none", "srtp", "utp", "wechat-video", "dtls", "wireguard"):
+            header = "none"
         s["kcpSettings"] = {"header": {"type": header or "none"}}
         if path and path != "/":
             s["kcpSettings"]["seed"] = path
@@ -117,8 +137,10 @@ def to_outbound(cfg, tag):
         if not ui:
             raise ValueError("no user")
         if p == "vless":
-            user = {"id": ui, "encryption": q.get("encryption") or "none"}
-            if q.get("flow"):
+            if (q.get("encryption") or "none") != "none":
+                raise ValueError("vless encryption")
+            user = {"id": ui, "encryption": "none"}
+            if q.get("flow") in FLOWS:
                 user["flow"] = q["flow"]
             return {"tag": tag, "protocol": "vless",
                     "settings": {"vnext": [{"address": cfg.host, "port": cfg.port, "users": [user]}]},
@@ -134,10 +156,15 @@ def to_outbound(cfg, tag):
             s = ui.replace("-", "+").replace("_", "/")
             ui = base64.b64decode(s + "=" * (-len(s) % 4)).decode("utf-8", "ignore")
         method, _, password = ui.partition(":")
-        if not method or not password:
+        method = method.lower()
+        if not method or not password or method not in SS_METHODS:
             raise ValueError("bad ss")
+        if method.startswith("2022"):
+            need = 16 if "128" in method else 32
+            if any(_b64len(k) != need for k in password.split(":")):
+                raise ValueError("bad ss2022 key")
         return {"tag": tag, "protocol": "shadowsocks",
-                "settings": {"servers": [{"address": cfg.host, "port": cfg.port, "method": method.lower(), "password": password}]}}
+                "settings": {"servers": [{"address": cfg.host, "port": cfg.port, "method": method, "password": password}]}}
 
     raise ValueError(f"unsupported proto {p}")
 
@@ -206,34 +233,40 @@ async def _probe_all(n):
     return await asyncio.gather(*(one(i) for i in range(n)))
 
 
-def _start(xray, conf):
+def _xray_ok(xray, items, diag):
     fd, path = tempfile.mkstemp(suffix=".json")
     with os.fdopen(fd, "w") as f:
-        json.dump(conf, f)
-    test = subprocess.run([xray, "run", "-test", "-c", path], capture_output=True, text=True, timeout=60)
-    if test.returncode != 0:
+        json.dump(build_config(items), f)
+    try:
+        r = subprocess.run([xray, "run", "-test", "-c", path], capture_output=True, text=True, timeout=60)
+    finally:
         os.unlink(path)
-        return None, (test.stdout + test.stderr)[-400:]
-    proc = subprocess.Popen([xray, "run", "-c", path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    return (proc, path), None
+    if r.returncode != 0 and len(diag["samples"]) < 6:
+        diag["samples"].append((r.stdout + r.stderr)[-300:])
+    return r.returncode == 0
 
 
-def _run_batch(xray, items, diag, depth=0):
-    """returns {idx: (ms, loc, ip)}; يقسم الدفعة لو فيها كونفيج بايظ"""
+def _valid(xray, items, diag):
+    """يرجع الكونفيجات اللي Xray بيقبلها (تقسيم ثنائي بـ -test بس، سريع)"""
+    if not items:
+        return []
+    if _xray_ok(xray, items, diag):
+        return items
+    if len(items) == 1:
+        diag["config_errors"] += 1
+        return []
+    mid = len(items) // 2
+    return _valid(xray, items[:mid], diag) + _valid(xray, items[mid:], diag)
+
+
+def _run_batch(xray, items, diag):
+    items = _valid(xray, items, diag)
     if not items:
         return {}
-    handle, err = _start(xray, build_config(items))
-    if handle is None:
-        diag["config_errors"] += 1
-        if len(diag["samples"]) < 5:
-            diag["samples"].append(err)
-        if len(items) == 1:
-            return {}
-        mid = len(items) // 2
-        r = _run_batch(xray, items[:mid], diag, depth + 1)
-        r.update(_run_batch(xray, items[mid:], diag, depth + 1))
-        return r
-    proc, path = handle
+    fd, path = tempfile.mkstemp(suffix=".json")
+    with os.fdopen(fd, "w") as f:
+        json.dump(build_config(items), f)
+    proc = subprocess.Popen([xray, "run", "-c", path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
         time.sleep(1.5)
         results = asyncio.run(_probe_all(len(items)))
@@ -258,7 +291,12 @@ def real_test(xray, configs, log=print):
             diag["convert_errors"] += 1
     diag["tested"] = len(items)
     t0 = time.time()
+    deadline = t0 + MAX_SECONDS
     for b in range(0, len(items), BATCH):
+        if time.time() > deadline:
+            log("   ⏱ وصلنا للحد الأقصى للوقت — هنكتفي بالنتايج دي")
+            diag["stopped_early"] = True
+            break
         res = _run_batch(xray, items[b:b + BATCH], diag)
         for idx, (ms, loc, ip) in res.items():
             c = configs[idx]
