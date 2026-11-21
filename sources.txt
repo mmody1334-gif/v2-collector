@@ -1,18 +1,14 @@
 # مصادر السيرفرات المجانية — لينك واحد في كل سطر (نص عادي أو Base64)
 # تقدر تضيف أو تشيل أي مصدر، والسطر اللي يبدأ بـ # بيتجاهل
+# لينكات t.me/s/ بتتقرأ من صفحة المعاينة العامة (آخر الرسايل بس) وبتتعلّم بـ 📡
 
+# --- مصادر GitHub رئيسية ---
 https://raw.githubusercontent.com/barry-far/V2ray-Config/main/All_Configs_Sub.txt
-https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt
 https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/all_sub.txt
-https://raw.githubusercontent.com/ebrasha/free-v2ray-public-list/main/all_extracted_configs.txt
 https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge.txt
-https://raw.githubusercontent.com/soroushmirzaei/telegram-configs-collector/main/splitted/mixed
-https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/master/collected-proxies/row-url/all.txt
+https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/airport_sub_merge.txt
 https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_BASE64.txt
 https://raw.githubusercontent.com/Leon406/SubCrawler/main/sub/share/vless
-https://raw.githubusercontent.com/Leon406/SubCrawler/main/sub/share/all3
-https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray
-https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2
 https://raw.githubusercontent.com/ermaozi/get_subscribe/main/subscribe/v2ray.txt
 https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list_raw.txt
 https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub
@@ -24,19 +20,30 @@ https://raw.githubusercontent.com/Alirewa/V2ray-Configs/main/config.txt
 https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/all/configs.txt
 https://raw.githubusercontent.com/DukeMehdi/FreeList-V2ray-Configs/refs/heads/main/Configs/All-DukeMehdi-Configs.txt
 https://raw.githubusercontent.com/Danialsamadi/v2go/main/AllConfigsSub.txt
+https://raw.githubusercontent.com/Danialsamadi/v2go/main/Sub1.txt
+https://raw.githubusercontent.com/Danialsamadi/v2go/main/Sub2.txt
 https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/super-sub.txt
-https://raw.githubusercontent.com/ebrasha/free-v2ray-public-list/refs/heads/main/V2Ray-Config-By-EbraSha-All-Type.txt
 https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/refs/heads/main/config/all_configs.txt
 https://raw.githubusercontent.com/geek-spot/Free-Config/main/all
 https://raw.githubusercontent.com/barry-far/V2ray-Config/main/Splitted-By-Protocol/trojan.txt
 https://raw.githubusercontent.com/barry-far/V2ray-Config/main/Splitted-By-Protocol/ss.txt
+https://raw.githubusercontent.com/mfuu/FreeProxies/main/sub
+https://raw.githubusercontent.com/free-nodes/v2rayfree/main/sub
 
-# --- مصر والخليج (ملفات متقسمة حسب الدولة) ---
-https://raw.githubusercontent.com/Danialsamadi/v2go/main/Splitted-By-Country/EG.txt
-https://raw.githubusercontent.com/Danialsamadi/v2go/main/Splitted-By-Country/SA.txt
+# --- مصر والخليج ---
 https://raw.githubusercontent.com/Danialsamadi/v2go/main/Splitted-By-Country/AE.txt
-https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Country/EG.txt
 https://raw.githubusercontent.com/miladtahanian/V2RayScrapeByCountry/main/Countries/Egypt.txt
-https://raw.githubusercontent.com/miladtahanian/V2RayScrapeByCountry/main/output_configs/Egypt.txt
 https://raw.githubusercontent.com/PENZA84/V2RayScrapeByCountry/main/Countries/Egypt.txt
-https://raw.githubusercontent.com/PENZA84/V2RayScrapeByCountry/main/output_configs/Egypt.txt
+https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/Countries/Egypt.txt
+
+# --- قنوات تليجرام (بتتعلّم بـ 📡 في النتايج) ---
+https://t.me/s/v2ray_Extractor
+https://t.me/s/V2rayNG3
+https://t.me/s/v2ray_configs_pools
+https://t.me/s/V2cnf
+https://t.me/s/prrofile_purple
+https://t.me/s/v2rayvless
+https://t.me/s/v2ray_free_conf
+https://t.me/s/vpnfail_v2ray
+https://t.me/s/ConfigsHUB
+https://t.me/s/SOSkeyNET
