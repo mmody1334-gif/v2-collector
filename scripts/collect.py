@@ -89,7 +89,7 @@ def fetch_all(urls):
             try:
                 text = fut.result()
                 found = LINK_RE.findall(text)
-                links.extend(found)
+                links.extend((u, l) for l in found)
                 stats[u] = len(found)
                 log(f"  ✓ {len(found):6d}  {u}")
             except Exception as e:
@@ -100,12 +100,13 @@ def fetch_all(urls):
 
 # ---------------------------------------------------------------- parsing
 class Config:
-    __slots__ = ("proto", "host", "port", "raw", "key", "vmess", "ip", "cc", "ms", "exit_ip", "clean")
+    __slots__ = ("proto", "host", "port", "raw", "key", "vmess", "ip", "cc", "ms", "exit_ip", "clean", "src", "tg")
 
     def __init__(self, proto, host, port, raw, key, vmess=None):
         self.proto, self.host, self.port = proto, host, port
         self.raw, self.key, self.vmess = raw, key, vmess
-        self.ip = self.cc = self.ms = self.exit_ip = self.clean = None
+        self.ip = self.cc = self.ms = self.exit_ip = self.clean = self.src = None
+        self.tg = False
 
     def with_remark(self, remark):
         if self.proto == "vmess":
@@ -294,7 +295,7 @@ def main():
     log("① تحميل المصادر…")
     if args.links_file:
         with open(args.links_file, encoding="utf-8") as f:
-            raw_links = LINK_RE.findall(f.read())
+            raw_links = [(args.links_file, l) for l in LINK_RE.findall(f.read())]
         src_stats = {args.links_file: len(raw_links)}
     else:
         raw_links, src_stats = fetch_all(read_sources(args.sources))
@@ -302,9 +303,11 @@ def main():
 
     log("② تحليل وإزالة المكرر…")
     uniq = {}
-    for l in raw_links:
+    for u, l in raw_links:
         c = parse(l)
         if c and c.key not in uniq:
+            c.src = u
+            c.tg = "t.me/" in u
             uniq[c.key] = c
     configs = list(uniq.values())[:MAX_UNIQUE]
     log(f"   فريد: {len(configs)}")
@@ -379,7 +382,8 @@ def main():
     for c in alive:
         counters[c.cc] = counters.get(c.cc, 0) + 1
         mark = " 🏠" if c.clean else ""
-        remark = f"{flag(c.cc)} {c.cc} {counters[c.cc]}{mark} | {c.ms}ms | {c.proto}"
+        tgmark = " 📡" if c.tg else ""
+        remark = f"{flag(c.cc)} {c.cc} {counters[c.cc]}{mark}{tgmark} | {c.ms}ms | {c.proto}"
         final[id(c)] = c.with_remark(remark)
 
     out = args.out
@@ -398,6 +402,7 @@ def main():
     files["clean"] = emit("clean.txt", clean_list[:ALL_LIMIT])
     # نفس توقيت عُمان (GMT+4) = المواقع متكشفش فرق التوقيت
     files["gulf4"] = emit("gulf4.txt", [c for c in alive if c.cc in ("AE", "OM")][:ALL_LIMIT])
+    files["telegram"] = emit("telegram.txt", [c for c in alive if c.tg][:ALL_LIMIT])
 
     by_cc, by_proto = {}, {}
     for c in alive:
@@ -412,6 +417,7 @@ def main():
             "code": cc, "flag": flag(cc), "count": n, "total": len(items),
             "best": min(ms), "avg": int(sum(ms) / len(ms)),
             "clean": sum(1 for c in items if c.clean),
+            "tg": sum(1 for c in items if c.tg),
             "protocols": sorted({c.proto for c in items}),
         })
     countries.sort(key=lambda x: (x["code"] == "XX", x["best"]))
@@ -423,7 +429,7 @@ def main():
     protocols.sort(key=lambda x: -x["total"])
 
     # ملف للصفحة: كل الكونفيجات المستخدمة مع بياناتها (للنسخ والفلترة بالبينج)
-    rows = [[final[id(c)], c.cc, c.proto, c.ms] for c in alive if id(c) in used]
+    rows = [[final[id(c)], c.cc, c.proto, c.ms, "telegram" if c.tg else "github"] for c in alive if id(c) in used]
     with open(os.path.join(out, "configs.json"), "w", encoding="utf-8") as f:
         json.dump(rows, f, ensure_ascii=False, separators=(",", ":"))
 
@@ -433,11 +439,13 @@ def main():
         "stats": {
             "raw": len(raw_links), "unique": len(uniq), "tested": len(targets), "tcp_alive": len(tcp_alive),
             "alive": len(alive), "clean": len(clean_list), "countries": len([c for c in countries if c["code"] != "XX"]),
+            "telegram_alive": sum(1 for c in alive if c.tg),
         },
         "files": files,
         "countries": countries,
         "protocols": protocols,
         "sources": src_stats,
+        "sources_alive": {u: sum(1 for c in alive if c.src == u) for u in src_stats},
         "test_mode": "real" if args.xray else "tcp",
         "real_test": diag,
     }
