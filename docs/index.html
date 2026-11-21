@@ -84,6 +84,7 @@
     <div class="stat"><b id="sAlive">—</b><span>سيرفر شغال</span></div>
     <div class="stat"><b id="sCountries">—</b><span>دولة</span></div>
     <div class="stat"><b id="sBest">—</b><span>أفضل بينج</span></div>
+    <div class="stat"><b id="sTg">—</b><span>📡 من تليجرام</span></div>
   </div>
 </header>
 
@@ -178,6 +179,7 @@
     $('#updated').textContent = `آخر تحديث ${timeAgo(d.updated)} • بيتحدث كل 3 ساعات`;
     $('#sAlive').textContent = d.stats.alive.toLocaleString('ar');
     $('#sCountries').textContent = d.stats.countries.toLocaleString('ar');
+    $('#sTg').textContent = (d.stats.telegram_alive || 0).toLocaleString('ar');
     const best = d.countries.length ? Math.min(...d.countries.map(c => c.best)) : 0;
     $('#sBest').innerHTML = `<span style="direction:ltr;display:inline-block">${best}ms</span>`;
 
@@ -188,6 +190,7 @@
         <div class="quick">
           <div class="tile" data-id="fast"><div class="check">✓</div><div class="ic">⚡</div><div class="t">الأسرع</div><div class="d">أسرع ${d.files.fast} سيرفر من كل الدول</div></div>
           <div class="tile" data-id="all"><div class="check">✓</div><div class="ic">🌍</div><div class="t">الكل</div><div class="d">${d.files.all.toLocaleString('ar')} سيرفر مترتبين بالبينج</div></div>
+          ${d.files.telegram ? `<div class="tile" data-id="telegram"><div class="check">✓</div><div class="ic">📡</div><div class="t">تليجرام</div><div class="d">${d.files.telegram.toLocaleString('ar')} سيرفر جايين من قنوات تليجرام</div></div>` : ''}
         </div>
       </section>
       <section>
@@ -233,7 +236,7 @@
       <div class="row" data-id="c:${c.code}">
         <div class="check">✓</div>
         <div class="flag">${c.flag}</div>
-        <div class="name"><b>${regionName(c.code)}</b><span>${c.total} سيرفر • ${c.protocols.map(p => PROTO_NAMES[p] || p).join('، ')}</span></div>
+        <div class="name"><b>${regionName(c.code)}</b><span>${c.total} سيرفر • ${c.protocols.map(p => PROTO_NAMES[p] || p).join('، ')}${c.tg ? ` • 📡${c.tg}` : ''}</span></div>
         <div class="ping ${pingClass(c.best)}">${c.best}ms</div>
       </div>`).join('') || '<div class="empty">مفيش نتائج</div>';
     refresh();
@@ -242,6 +245,7 @@
   function itemFor(id) {
     if (id === 'fast') return {id, name: '⚡ الأسرع', file: 'fast.txt', match: () => true, top: DATA.files.fast};
     if (id === 'all') return {id, name: '🌍 الكل', file: 'all.txt', match: () => true};
+    if (id === 'telegram') return {id, name: '📡 تليجرام', file: 'telegram.txt', match: r => r[4] === 'telegram'};
     if (id.startsWith('p:')) { const p = id.slice(2); return {id, name: '🔐 ' + (PROTO_NAMES[p] || p), file: `protocol/${p}.txt`, match: r => r[2] === p}; }
     const cc = id.slice(2), c = DATA.countries.find(x => x.code === cc);
     return {id, name: `${c ? c.flag : ''} ${regionName(cc)}`, file: `country/${cc}.txt`, match: r => r[1] === cc};
