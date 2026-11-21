@@ -146,9 +146,8 @@ def to_outbound(cfg, tag):
         if not ui:
             raise ValueError("no user")
         if p == "vless":
-            if (q.get("encryption") or "none") != "none":
-                raise ValueError("vless encryption")
-            user = {"id": ui, "encryption": "none"}
+            enc = q.get("encryption") or "none"
+            user = {"id": ui, "encryption": enc}  # encryption غير none بيحتاج Xray >= 25.8
             if q.get("flow") in FLOWS:
                 user["flow"] = q["flow"]
             return {"tag": tag, "protocol": "vless",
