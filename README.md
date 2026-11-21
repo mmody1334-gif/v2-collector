@@ -12,6 +12,7 @@
 | 🌍 الكل | `https://raw.githubusercontent.com/mmody1334-gif/v2-collector/subs/all.txt` |
 | 🇩🇪 دولة | `https://raw.githubusercontent.com/mmody1334-gif/v2-collector/subs/country/DE.txt` |
 | 🔐 بروتوكول | `https://raw.githubusercontent.com/mmody1334-gif/v2-collector/subs/protocol/vless.txt` |
+| 📡 تليجرام | `https://raw.githubusercontent.com/mmody1334-gif/v2-collector/subs/telegram.txt` |
 
 ## الملفات
 - `sources.txt`: المصادر، ضيف أو شيل براحتك.
