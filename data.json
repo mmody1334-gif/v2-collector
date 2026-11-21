@@ -1,0 +1,855 @@
+{
+ "updated": "2026-11-21T17:05:02+00:00",
+ "duration_sec": 1275,
+ "stats": {
+  "raw": 62531,
+  "unique": 39176,
+  "tested": 22489,
+  "tcp_alive": 29843,
+  "alive": 2599,
+  "clean": 262,
+  "countries": 48,
+  "telegram_alive": 13
+ },
+ "files": {
+  "all": 2599,
+  "fast": 300,
+  "clean": 262,
+  "gulf4": 16,
+  "telegram": 13
+ },
+ "countries": [
+  {
+   "code": "US",
+   "flag": "🇺🇸",
+   "count": 200,
+   "total": 863,
+   "best": 14,
+   "avg": 757,
+   "clean": 25,
+   "tg": 3,
+   "protocols": [
+    "ss",
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "CA",
+   "flag": "🇨🇦",
+   "count": 77,
+   "total": 77,
+   "best": 29,
+   "avg": 801,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "HK",
+   "flag": "🇭🇰",
+   "count": 42,
+   "total": 42,
+   "best": 91,
+   "avg": 1278,
+   "clean": 19,
+   "tg": 1,
+   "protocols": [
+    "ss",
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "JP",
+   "flag": "🇯🇵",
+   "count": 122,
+   "total": 122,
+   "best": 198,
+   "avg": 1827,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "IL",
+   "flag": "🇮🇱",
+   "count": 9,
+   "total": 9,
+   "best": 218,
+   "avg": 770,
+   "clean": 2,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "vless"
+   ]
+  },
+  {
+   "code": "ZZ",
+   "flag": "📡",
+   "count": 13,
+   "total": 13,
+   "best": 259,
+   "avg": 763,
+   "clean": 1,
+   "tg": 13,
+   "protocols": [
+    "ss",
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "NL",
+   "flag": "🇳🇱",
+   "count": 200,
+   "total": 443,
+   "best": 279,
+   "avg": 1173,
+   "clean": 33,
+   "tg": 1,
+   "protocols": [
+    "ss",
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "GB",
+   "flag": "🇬🇧",
+   "count": 50,
+   "total": 50,
+   "best": 281,
+   "avg": 880,
+   "clean": 1,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "DE",
+   "flag": "🇩🇪",
+   "count": 200,
+   "total": 294,
+   "best": 290,
+   "avg": 987,
+   "clean": 38,
+   "tg": 3,
+   "protocols": [
+    "ss",
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "KR",
+   "flag": "🇰🇷",
+   "count": 21,
+   "total": 21,
+   "best": 294,
+   "avg": 432,
+   "clean": 0,
+   "tg": 1,
+   "protocols": [
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "FR",
+   "flag": "🇫🇷",
+   "count": 115,
+   "total": 115,
+   "best": 297,
+   "avg": 1277,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "IE",
+   "flag": "🇮🇪",
+   "count": 2,
+   "total": 2,
+   "best": 310,
+   "avg": 1061,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "vless"
+   ]
+  },
+  {
+   "code": "IT",
+   "flag": "🇮🇹",
+   "count": 30,
+   "total": 30,
+   "best": 314,
+   "avg": 1137,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "vless"
+   ]
+  },
+  {
+   "code": "SG",
+   "flag": "🇸🇬",
+   "count": 78,
+   "total": 78,
+   "best": 324,
+   "avg": 930,
+   "clean": 5,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "AE",
+   "flag": "🇦🇪",
+   "count": 16,
+   "total": 16,
+   "best": 328,
+   "avg": 1166,
+   "clean": 3,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "CH",
+   "flag": "🇨🇭",
+   "count": 43,
+   "total": 43,
+   "best": 331,
+   "avg": 1390,
+   "clean": 12,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "ES",
+   "flag": "🇪🇸",
+   "count": 44,
+   "total": 44,
+   "best": 337,
+   "avg": 2113,
+   "clean": 25,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "trojan",
+    "vless"
+   ]
+  },
+  {
+   "code": "SE",
+   "flag": "🇸🇪",
+   "count": 30,
+   "total": 30,
+   "best": 347,
+   "avg": 650,
+   "clean": 0,
+   "tg": 3,
+   "protocols": [
+    "ss",
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "AT",
+   "flag": "🇦🇹",
+   "count": 18,
+   "total": 18,
+   "best": 353,
+   "avg": 1228,
+   "clean": 4,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "FI",
+   "flag": "🇫🇮",
+   "count": 17,
+   "total": 17,
+   "best": 390,
+   "avg": 623,
+   "clean": 3,
+   "tg": 0,
+   "protocols": [
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "UA",
+   "flag": "🇺🇦",
+   "count": 8,
+   "total": 8,
+   "best": 401,
+   "avg": 898,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "GR",
+   "flag": "🇬🇷",
+   "count": 1,
+   "total": 1,
+   "best": 451,
+   "avg": 451,
+   "clean": 1,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "RU",
+   "flag": "🇷🇺",
+   "count": 79,
+   "total": 79,
+   "best": 451,
+   "avg": 1000,
+   "clean": 32,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "vless"
+   ]
+  },
+  {
+   "code": "TH",
+   "flag": "🇹🇭",
+   "count": 2,
+   "total": 2,
+   "best": 461,
+   "avg": 461,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "vmess"
+   ]
+  },
+  {
+   "code": "PL",
+   "flag": "🇵🇱",
+   "count": 3,
+   "total": 3,
+   "best": 476,
+   "avg": 514,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "CL",
+   "flag": "🇨🇱",
+   "count": 7,
+   "total": 7,
+   "best": 479,
+   "avg": 493,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "trojan"
+   ]
+  },
+  {
+   "code": "AU",
+   "flag": "🇦🇺",
+   "count": 7,
+   "total": 7,
+   "best": 479,
+   "avg": 496,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "trojan",
+    "vless"
+   ]
+  },
+  {
+   "code": "NO",
+   "flag": "🇳🇴",
+   "count": 1,
+   "total": 1,
+   "best": 520,
+   "avg": 520,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "ss"
+   ]
+  },
+  {
+   "code": "EE",
+   "flag": "🇪🇪",
+   "count": 6,
+   "total": 6,
+   "best": 520,
+   "avg": 2202,
+   "clean": 3,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "BR",
+   "flag": "🇧🇷",
+   "count": 28,
+   "total": 28,
+   "best": 550,
+   "avg": 679,
+   "clean": 17,
+   "tg": 1,
+   "protocols": [
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "CN",
+   "flag": "🇨🇳",
+   "count": 1,
+   "total": 1,
+   "best": 555,
+   "avg": 555,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "vmess"
+   ]
+  },
+  {
+   "code": "TR",
+   "flag": "🇹🇷",
+   "count": 9,
+   "total": 9,
+   "best": 561,
+   "avg": 1074,
+   "clean": 9,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "LV",
+   "flag": "🇱🇻",
+   "count": 5,
+   "total": 5,
+   "best": 565,
+   "avg": 1786,
+   "clean": 2,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "ZA",
+   "flag": "🇿🇦",
+   "count": 5,
+   "total": 5,
+   "best": 566,
+   "avg": 728,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "trojan"
+   ]
+  },
+  {
+   "code": "DK",
+   "flag": "🇩🇰",
+   "count": 3,
+   "total": 3,
+   "best": 571,
+   "avg": 601,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "BG",
+   "flag": "🇧🇬",
+   "count": 6,
+   "total": 6,
+   "best": 580,
+   "avg": 626,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "TW",
+   "flag": "🇹🇼",
+   "count": 7,
+   "total": 7,
+   "best": 600,
+   "avg": 1289,
+   "clean": 4,
+   "tg": 0,
+   "protocols": [
+    "trojan",
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "CY",
+   "flag": "🇨🇾",
+   "count": 2,
+   "total": 2,
+   "best": 615,
+   "avg": 628,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "RO",
+   "flag": "🇷🇴",
+   "count": 3,
+   "total": 3,
+   "best": 636,
+   "avg": 643,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "IN",
+   "flag": "🇮🇳",
+   "count": 19,
+   "total": 19,
+   "best": 659,
+   "avg": 905,
+   "clean": 5,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "CZ",
+   "flag": "🇨🇿",
+   "count": 4,
+   "total": 4,
+   "best": 748,
+   "avg": 965,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "ss",
+    "vless"
+   ]
+  },
+  {
+   "code": "BY",
+   "flag": "🇧🇾",
+   "count": 18,
+   "total": 18,
+   "best": 932,
+   "avg": 1276,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "MX",
+   "flag": "🇲🇽",
+   "count": 1,
+   "total": 1,
+   "best": 951,
+   "avg": 951,
+   "clean": 1,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "KZ",
+   "flag": "🇰🇿",
+   "count": 21,
+   "total": 21,
+   "best": 1090,
+   "avg": 2659,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "vless",
+    "vmess"
+   ]
+  },
+  {
+   "code": "SC",
+   "flag": "🇸🇨",
+   "count": 5,
+   "total": 5,
+   "best": 1179,
+   "avg": 1579,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "NG",
+   "flag": "🇳🇬",
+   "count": 16,
+   "total": 16,
+   "best": 1181,
+   "avg": 2022,
+   "clean": 0,
+   "tg": 0,
+   "protocols": [
+    "trojan"
+   ]
+  },
+  {
+   "code": "IQ",
+   "flag": "🇮🇶",
+   "count": 17,
+   "total": 17,
+   "best": 1969,
+   "avg": 3019,
+   "clean": 17,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  },
+  {
+   "code": "AM",
+   "flag": "🇦🇲",
+   "count": 1,
+   "total": 1,
+   "best": 2489,
+   "avg": 2489,
+   "clean": 1,
+   "tg": 0,
+   "protocols": [
+    "vless"
+   ]
+  }
+ ],
+ "protocols": [
+  {
+   "name": "vless",
+   "count": 1000,
+   "total": 1520,
+   "best": 36
+  },
+  {
+   "name": "vmess",
+   "count": 457,
+   "total": 457,
+   "best": 14
+  },
+  {
+   "name": "trojan",
+   "count": 332,
+   "total": 332,
+   "best": 22
+  },
+  {
+   "name": "ss",
+   "count": 290,
+   "total": 290,
+   "best": 29
+  }
+ ],
+ "sources": {
+  "https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub": 12,
+  "https://raw.githubusercontent.com/vorz1k/v2box/main/supreme_vpns_1.txt": 12,
+  "https://raw.githubusercontent.com/ermaozi/get_subscribe/main/subscribe/v2ray.txt": 376,
+  "https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list_raw.txt": 301,
+  "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/all_sub.txt": 3979,
+  "https://raw.githubusercontent.com/Alirewa/V2ray-Configs/main/config.txt": 2000,
+  "https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_BASE64.txt": 101,
+  "https://raw.githubusercontent.com/barry-far/V2ray-Config/main/All_Configs_Sub.txt": 9051,
+  "https://raw.githubusercontent.com/vorz1k/v2box/main/supreme_vpns_2.txt": 6,
+  "https://raw.githubusercontent.com/Danialsamadi/v2go/main/Sub2.txt": 0,
+  "https://raw.githubusercontent.com/Danialsamadi/v2go/main/AllConfigsSub.txt": 497,
+  "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/all/configs.txt": 11619,
+  "https://raw.githubusercontent.com/geek-spot/Free-Config/main/all": 158,
+  "https://raw.githubusercontent.com/Danialsamadi/v2go/main/Sub1.txt": 497,
+  "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/airport_sub_merge.txt": 61,
+  "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/super-sub.txt": 198,
+  "https://raw.githubusercontent.com/barry-far/V2ray-Config/main/Splitted-By-Protocol/ss.txt": 1795,
+  "https://raw.githubusercontent.com/DukeMehdi/FreeList-V2ray-Configs/refs/heads/main/Configs/All-DukeMehdi-Configs.txt": 1678,
+  "https://raw.githubusercontent.com/barry-far/V2ray-Config/main/Splitted-By-Protocol/trojan.txt": 832,
+  "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/refs/heads/main/config/all_configs.txt": 4259,
+  "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge.txt": 4397,
+  "https://raw.githubusercontent.com/free-nodes/v2rayfree/main/sub": 16,
+  "https://raw.githubusercontent.com/miladtahanian/V2RayScrapeByCountry/main/Countries/Egypt.txt": 1,
+  "https://raw.githubusercontent.com/Danialsamadi/v2go/main/Splitted-By-Country/AE.txt": 9,
+  "https://raw.githubusercontent.com/PENZA84/V2RayScrapeByCountry/main/Countries/Egypt.txt": 1,
+  "https://raw.githubusercontent.com/Leon406/SubCrawler/main/sub/share/vless": 19417,
+  "https://raw.githubusercontent.com/mfuu/FreeProxies/main/sub": 115,
+  "https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/Countries/Egypt.txt": 1,
+  "https://t.me/s/ConfigsHUB": 19,
+  "https://t.me/s/v2rayvless": 55,
+  "https://t.me/s/vpnfail_v2ray": 20,
+  "https://t.me/s/v2ray_free_conf": 18,
+  "https://t.me/s/V2rayNG3": 185,
+  "https://t.me/s/V2cnf": 156,
+  "https://t.me/s/SOSkeyNET": 170,
+  "https://t.me/s/v2ray_configs_pools": 165,
+  "https://t.me/s/v2ray_Extractor": 205,
+  "https://t.me/s/prrofile_purple": 149
+ },
+ "sources_alive": {
+  "https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub": 9,
+  "https://raw.githubusercontent.com/vorz1k/v2box/main/supreme_vpns_1.txt": 0,
+  "https://raw.githubusercontent.com/ermaozi/get_subscribe/main/subscribe/v2ray.txt": 107,
+  "https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list_raw.txt": 0,
+  "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/all_sub.txt": 181,
+  "https://raw.githubusercontent.com/Alirewa/V2ray-Configs/main/config.txt": 79,
+  "https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_BASE64.txt": 7,
+  "https://raw.githubusercontent.com/barry-far/V2ray-Config/main/All_Configs_Sub.txt": 859,
+  "https://raw.githubusercontent.com/vorz1k/v2box/main/supreme_vpns_2.txt": 0,
+  "https://raw.githubusercontent.com/Danialsamadi/v2go/main/Sub2.txt": 0,
+  "https://raw.githubusercontent.com/Danialsamadi/v2go/main/AllConfigsSub.txt": 86,
+  "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/all/configs.txt": 690,
+  "https://raw.githubusercontent.com/geek-spot/Free-Config/main/all": 0,
+  "https://raw.githubusercontent.com/Danialsamadi/v2go/main/Sub1.txt": 0,
+  "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/airport_sub_merge.txt": 0,
+  "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/super-sub.txt": 1,
+  "https://raw.githubusercontent.com/barry-far/V2ray-Config/main/Splitted-By-Protocol/ss.txt": 0,
+  "https://raw.githubusercontent.com/DukeMehdi/FreeList-V2ray-Configs/refs/heads/main/Configs/All-DukeMehdi-Configs.txt": 168,
+  "https://raw.githubusercontent.com/barry-far/V2ray-Config/main/Splitted-By-Protocol/trojan.txt": 0,
+  "https://raw.githubusercontent.com/Delta-Kronecker/V2ray-Config/refs/heads/main/config/all_configs.txt": 251,
+  "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge.txt": 4,
+  "https://raw.githubusercontent.com/free-nodes/v2rayfree/main/sub": 0,
+  "https://raw.githubusercontent.com/miladtahanian/V2RayScrapeByCountry/main/Countries/Egypt.txt": 0,
+  "https://raw.githubusercontent.com/Danialsamadi/v2go/main/Splitted-By-Country/AE.txt": 0,
+  "https://raw.githubusercontent.com/PENZA84/V2RayScrapeByCountry/main/Countries/Egypt.txt": 0,
+  "https://raw.githubusercontent.com/Leon406/SubCrawler/main/sub/share/vless": 133,
+  "https://raw.githubusercontent.com/mfuu/FreeProxies/main/sub": 11,
+  "https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/Countries/Egypt.txt": 0,
+  "https://t.me/s/ConfigsHUB": 3,
+  "https://t.me/s/v2rayvless": 0,
+  "https://t.me/s/vpnfail_v2ray": 2,
+  "https://t.me/s/v2ray_free_conf": 0,
+  "https://t.me/s/V2rayNG3": 0,
+  "https://t.me/s/V2cnf": 2,
+  "https://t.me/s/SOSkeyNET": 5,
+  "https://t.me/s/v2ray_configs_pools": 1,
+  "https://t.me/s/v2ray_Extractor": 0,
+  "https://t.me/s/prrofile_purple": 0
+ },
+ "test_mode": "real",
+ "real_test": {
+  "convert_errors": 280,
+  "config_errors": 276,
+  "samples": [
+   "25252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525253A%25252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252540mahanvpn\n",
+   "25252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525253A%25252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252540mahanvpn\n",
+   "25252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525253A%25252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252540mahanvpn\n",
+   "25252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525253A%25252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252540mahanvpn\n",
+   "25252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525253A%25252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252540mahanvpn\n",
+   "25252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525253A%25252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252525252540mahanvpn\n"
+  ],
+  "tested": 29563,
+  "ok": 2858,
+  "fail_reasons": {
+   "conv:unsupported proto hysteria2": 55,
+   "conv:bad reality pbk": 150,
+   "conv:unsupported net tcp,udp": 1,
+   "conv:bad ss": 64,
+   "conv:unsupported net w...": 1,
+   "conv:'bool' object has no attribute 'lower'": 1,
+   "conv:unsupported net tcp#💡94@oneclickvpnkeysv": 1,
+   "conv:unsupported net tcp?type=tcp": 1,
+   "conv:unsupported net tcp#2🐊@oneclickvpnkeys": 1,
+   "conv:unsupported net tcp#2🐊@oneclickvpnkeysvl": 1,
+   "conv:unsupported net tcp%232%f0%9f%90%8a%40on": 1,
+   "conv:unsupported net none": 3,
+   "status_0": 7292,
+   "ConnectionResetError": 16650,
+   "status_400": 476,
+   "timeout": 1686,
+   "socks_rep_x": 1,
+   "OSError": 1,
+   "ConnectionRefusedError": 185,
+   "status_404": 1,
+   "status_200": 132,
+   "status_301": 6
+  },
+  "priority_candidates": {
+   "AE": 121,
+   "SA": 17,
+   "JO": 2,
+   "IQ": 7,
+   "EG": 1,
+   "KW": 1
+  }
+ }
+}
