@@ -420,6 +420,20 @@ def main():
             "tg": sum(1 for c in items if c.tg),
             "protocols": sorted({c.proto for c in items}),
         })
+    # مدخل "تليجرام" كدولة وهمية ZZ (كود مش مستخدم في ISO فمش هيصطدم بدولة حقيقية)
+    # — التطبيق بيعرضها جنب الدول تلقائي من غير تحديث. العلم 📡.
+    tg_alive = [c for c in alive if c.tg]
+    if tg_alive:
+        emit("country/ZZ.txt", tg_alive[:COUNTRY_LIMIT])
+        ms = [c.ms for c in tg_alive]
+        countries.append({
+            "code": "ZZ", "flag": "📡", "count": min(len(tg_alive), COUNTRY_LIMIT), "total": len(tg_alive),
+            "best": min(ms), "avg": int(sum(ms) / len(ms)),
+            "clean": sum(1 for c in tg_alive if c.clean),
+            "tg": len(tg_alive),
+            "protocols": sorted({c.proto for c in tg_alive}),
+        })
+
     countries.sort(key=lambda x: (x["code"] == "XX", x["best"]))
 
     protocols = []
