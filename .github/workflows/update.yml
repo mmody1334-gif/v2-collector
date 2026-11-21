@@ -32,7 +32,7 @@ jobs:
       # نسخة قبل 26 عشان تقبل allowInsecure و VLESS من غير TLS (شائعين في السيرفرات المجانية)
       - name: Download Xray-core
         env:
-          XRAY_VERSION: v25.3.6
+          XRAY_VERSION: v25.12.8
         run: |
           if ! curl -fsSL --retry 3 -o xray.zip "https://github.com/XTLS/Xray-core/releases/download/${XRAY_VERSION}/Xray-linux-64.zip"; then
             echo "fallback to latest"; echo "XRAY_LEGACY=0" >> $GITHUB_ENV
