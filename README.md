@@ -13,12 +13,14 @@
 | 🇩🇪 دولة | `https://raw.githubusercontent.com/mmody1334-gif/v2-collector/subs/country/DE.txt` |
 | 🔐 بروتوكول | `https://raw.githubusercontent.com/mmody1334-gif/v2-collector/subs/protocol/vless.txt` |
 | 📡 تليجرام | `https://raw.githubusercontent.com/mmody1334-gif/v2-collector/subs/telegram.txt` |
+| 🧼 WARP نظيف | `https://raw.githubusercontent.com/mmody1334-gif/v2-collector/subs/warp.txt` |
 | 🧼 آي بي نظيف | `https://raw.githubusercontent.com/mmody1334-gif/v2-collector/subs/cleanip.txt` |
 
 ## الآي بي النظيف (Clean IP)
 آي بيهات كلاودفلير متجربة (TLS على 443) ومش متعلمة كـ بروكسي/VPN عند ip-api. استخدمها كعنوان سيرفر (Address) في أي كونفيج شغال على كلاودفلير مع سيب الـ SNI/Host زي ما هو، أو كـ Endpoint في WARP — كده الموقع بيشوف آي بي كلاودفلير العادي ومش بيكشف إنك على VPN.
 - `cleanip-manual.txt`: آي بيهاتك اللي جربتها بنفسك — بتتثبت أول القايمة.
 - `cleanip-sources.txt`: قوايم عامة بتتسحب كل تشغيلة.
+- اشتراك **🧼 WARP نظيف** (`warp.txt`): كونفيجات WireGuard/WARP جاهزة بأنضف آي بيهات WARP، بتتسجّل تلقائي كل تشغيلة — استيرادها في v2rayNG أو التطبيق وشغّل على طول، والمواقع بتشوف آي بي كلاودفلير العادي.
 
 ## الملفات
 - `sources.txt`: المصادر، ضيف أو شيل براحتك.
