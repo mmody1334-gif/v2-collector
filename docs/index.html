@@ -192,12 +192,13 @@
           <div class="tile" data-id="fast"><div class="check">✓</div><div class="ic">⚡</div><div class="t">الأسرع</div><div class="d">أسرع ${d.files.fast} سيرفر من كل الدول</div></div>
           <div class="tile" data-id="all"><div class="check">✓</div><div class="ic">🌍</div><div class="t">الكل</div><div class="d">${d.files.all.toLocaleString('ar')} سيرفر مترتبين بالبينج</div></div>
           ${d.files.telegram ? `<div class="tile" data-id="telegram"><div class="check">✓</div><div class="ic">📡</div><div class="t">تليجرام</div><div class="d">${d.files.telegram.toLocaleString('ar')} سيرفر جايين من قنوات تليجرام</div></div>` : ''}
+          ${d.files.warp ? `<div class="tile" data-id="warp"><div class="check">✓</div><div class="ic">🧼</div><div class="t">WARP نظيف</div><div class="d">${d.files.warp.toLocaleString('ar')} كونفيج WARP جاهز بآي بيهات مش متكشفة</div></div>` : ''}
         </div>
       </section>
       <section id="cleanipSec" style="display:none">
         <h2><span>🧼 آي بي نظيف <small id="ipsNote" style="color:var(--muted)"></small></span><button id="copyIps">نسخ الكل</button></h2>
         <div class="list" id="ips"></div>
-        <div class="note">آي بيهات كلاودفلير متجربة ومش متعلمة كـ VPN/بروكسي. استخدم الآي بي كعنوان سيرفر (Address) في أي كونفيج شغال على كلاودفلير وسيّب الـ SNI/Host زي ما هو، أو كـ Endpoint في WARP. البينج مقاس من سيرفرات GitHub، فجرّب على جهازك.</div>
+        <div class="note">آي بيهات كلاودفلير متجربة ومش متعلمة كـ VPN/بروكسي. الأسهل: اشتراك «🧼 WARP نظيف» فوق — كونفيجات جاهزة تشتغل على طول. أو استخدم الآي بي كعنوان سيرفر (Address) في أي كونفيج شغال على كلاودفلير وسيّب الـ SNI/Host زي ما هو، أو كـ Endpoint في WARP. البينج مقاس من سيرفرات GitHub، فجرّب على جهازك.</div>
       </section>
       <section>
         <h2>حسب البروتوكول</h2>
@@ -252,6 +253,7 @@
     if (id === 'fast') return {id, name: '⚡ الأسرع', file: 'fast.txt', match: () => true, top: DATA.files.fast};
     if (id === 'all') return {id, name: '🌍 الكل', file: 'all.txt', match: () => true};
     if (id === 'telegram') return {id, name: '📡 تليجرام', file: 'telegram.txt', match: r => r[4] === 'telegram'};
+    if (id === 'warp') return {id, name: '🧼 WARP نظيف', file: 'warp.txt', match: () => false};
     if (id.startsWith('p:')) { const p = id.slice(2); return {id, name: '🔐 ' + (PROTO_NAMES[p] || p), file: `protocol/${p}.txt`, match: r => r[2] === p}; }
     const cc = id.slice(2), c = DATA.countries.find(x => x.code === cc);
     return {id, name: `${c ? c.flag : ''} ${regionName(cc)}`, file: `country/${cc}.txt`, match: r => r[1] === cc};
