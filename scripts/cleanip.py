@@ -12,6 +12,7 @@ Usage:
   3) سامبلنج من رينجات كلاودفلير الرسمية (احتياطي لو القوايم وقعت).
 """
 import argparse
+import base64
 import concurrent.futures
 import ipaddress
 import json
@@ -20,6 +21,7 @@ import re
 import socket
 import ssl
 import time
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
@@ -29,6 +31,10 @@ MAX_CANDIDATES = 3000    # أقصى عدد مرشحين يتختبروا
 CONCURRENCY = 400
 LIMIT = 100              # أقصى عدد آي بيهات في الناتج
 TRACE_HOST = "www.cloudflare.com"
+WARP_LIMIT = 10            # عدد كونفيجات WARP الجاهزة
+WARP_PORT = 2408
+WARP_REG_URL = "https://api.cloudflareclient.com/v0a2158/reg"
+CLEAN_COUNTRY = "ZC"      # كود وهمي (مش ISO) لصف "آي بي نظيف" — التطبيق بيعرضه جنب الدول من غير تحديث
 
 IPV4_RE = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
 
@@ -153,6 +159,134 @@ def detect(ips):
     return flags
 
 
+# ---------------------------------------------------------------- WARP
+_WARP_NETS = [ipaddress.ip_network(c) for c in WARP_24]
+
+
+def x25519_public(priv_b64):
+    """WireGuard public key من الـ private (RFC 7748 — من غير مكتبات خارجية)."""
+    k = bytearray(base64.b64decode(priv_b64))
+    k[0] &= 248
+    k[31] &= 127
+    k[31] |= 64
+    n = int.from_bytes(k, "little")
+    p = 2 ** 255 - 19
+    x1, x2, z2, x3, z3 = 9, 1, 0, 9, 1
+    swap = 0
+    for t in reversed(range(255)):
+        kt = (n >> t) & 1
+        swap ^= kt
+        if swap:
+            x2, x3 = x3, x2
+            z2, z3 = z3, z2
+        swap = kt
+        a = (x2 + z2) % p
+        aa = a * a % p
+        b = (x2 - z2) % p
+        bb = b * b % p
+        e = (aa - bb) % p
+        c = (x3 + z3) % p
+        d = (x3 - z3) % p
+        da = d * a % p
+        cb = c * b % p
+        x3 = (da + cb) ** 2 % p
+        z3 = x1 * ((da - cb) ** 2 % p) % p
+        x2 = aa * bb % p
+        z2 = e * ((aa + 121665 * e) % p) % p
+    if swap:
+        x2, x3 = x3, x2
+        z2, z3 = z3, z2
+    pub = x2 * pow(z2, p - 2, p) % p
+    return base64.b64encode(pub.to_bytes(32, "little")).decode()
+
+
+def wg_keypair():
+    """مفتاح WireGuard عشوائي — بيعيد المحاولة لو فيه '/' (بيكسر الـ URI)."""
+    for _ in range(50):
+        priv = base64.b64encode(os.urandom(32)).decode()
+        if "/" not in priv:
+            return priv, x25519_public(priv)
+    raise RuntimeError("مش قادر أطلع مفتاح نضيف")
+
+
+def warp_register(pubkey):
+    """تسجيل جهاز WARP مجاني من غير حساب (نفس API بتاع wgcf) — بيرجع (v4, v6, peer_pubkey, reserved)."""
+    body = json.dumps({
+        "install_id": "", "fcm_token": "", "type": "Android",
+        "model": "v2rayNG", "locale": "en_US",
+        "tos": datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
+        "key": pubkey,
+    }).encode()
+    req = urllib.request.Request(WARP_REG_URL, data=body, headers={
+        "Content-Type": "application/json; charset=UTF-8",
+        "User-Agent": "okhttp/3.12.1",
+    })
+    with urllib.request.urlopen(req, timeout=30) as r:
+        j = json.loads(r.read().decode())
+    cfg = j.get("result", j).get("config", {})
+    v4 = cfg["interface"]["addresses"]["v4"]
+    v6 = cfg["interface"]["addresses"]["v6"]
+    peer = cfg["peers"][0]["public_key"]
+    try:
+        reserved = list(base64.b64decode(cfg.get("client_id", "")))[:3]
+    except Exception:
+        reserved = []
+    if len(reserved) != 3:
+        reserved = [0, 0, 0]
+    return v4, v6, peer, reserved
+
+
+def warp_link(priv, ip, v4, v6, peer, reserved, name):
+    q = urllib.parse.quote
+    params = (f"address={q(v4)}%2C{q(v6)}&publickey={q(peer, safe='')}"
+              f"&mtu=1280&reserved={reserved[0]}%2C{reserved[1]}%2C{reserved[2]}&dns=1.1.1.1")
+    return f"wireguard://{priv}@{ip}:{WARP_PORT}?{params}#{q(name)}"
+
+
+def write_sub(path, links):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(base64.b64encode("\n".join(links).encode("utf-8")).decode())
+
+
+def build_warp(rows, out):
+    """كونفيجات WARP جاهزة بأنضف آي بيهات WARP — بتتنشر كاشتراك عادي بيفتح في v2rayNG والتطبيق."""
+    endpoints = [r["ip"] for r in rows
+                 if any(ipaddress.IPv4Address(r["ip"]) in n for n in _WARP_NETS)][:WARP_LIMIT]
+    if not endpoints:
+        log("  ⚠️ مفيش آي بيهات WARP شغالة — اتخطّى توليد الكونفيجات")
+        return 0
+    priv, pub = wg_keypair()
+    v4, v6, peer, reserved = warp_register(pub)
+    links = [warp_link(priv, ip, v4, v6, peer, reserved, f"🧼 WARP نظيف {i + 1} | {ip}")
+             for i, ip in enumerate(endpoints)]
+    write_sub(os.path.join(out, "warp.txt"), links)
+    write_sub(os.path.join(out, "country", f"{CLEAN_COUNTRY}.txt"), links)
+    write_sub(os.path.join(out, "protocol", "wireguard.txt"), links)
+
+    # حدّث data.json اللي collect.py كتبه: ملف جديد + صف دولة + بروتوكول wireguard
+    data_path = os.path.join(out, "data.json")
+    if os.path.exists(data_path):
+        with open(data_path, encoding="utf-8") as f:
+            data = json.load(f)
+        best = min((r["ms"] for r in rows if r["ip"] in endpoints), default=0)
+        data.setdefault("files", {})["warp"] = len(links)
+        countries = [c for c in data.get("countries", []) if c.get("code") != CLEAN_COUNTRY]
+        countries.append({
+            "code": CLEAN_COUNTRY, "flag": "🧼", "count": len(links), "total": len(links),
+            "best": best, "avg": best, "clean": 0, "tg": 0, "protocols": ["wireguard"],
+        })
+        countries.sort(key=lambda x: (x["code"] == "XX", x["best"]))
+        data["countries"] = countries
+        protos = [p for p in data.get("protocols", []) if p.get("name") != "wireguard"]
+        protos.append({"name": "wireguard", "count": len(links), "total": len(links), "best": best})
+        data["protocols"] = protos
+        with open(data_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=1)
+    log(f"  🧼 {len(links)} كونفيج WARP جاهز (أفضل بينج {best}ms)")
+    return len(links)
+
+
 # ---------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser()
@@ -216,6 +350,11 @@ def main():
     with open(os.path.join(a.out, "cleanip.json"), "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=1)
     log(f"اتنشر {len(top)} آي بي — مش متكشف: {payload['undetected']}")
+
+    try:
+        build_warp(rows, a.out)
+    except Exception as e:
+        log(f"  ⚠️ توليد WARP فشل (الآي بيهات نفسها اتنشرت عادي): {e}")
 
 
 if __name__ == "__main__":
