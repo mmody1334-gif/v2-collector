@@ -6,7 +6,7 @@ on:
   workflow_dispatch:          # تشغيل يدوي من تبويب Actions
   push:
     branches: [main]
-    paths: ["scripts/**", "sources.txt", ".github/workflows/**"]
+    paths: ["scripts/**", "sources.txt", "cleanip-sources.txt", "cleanip-manual.txt", ".github/workflows/**"]
 
 permissions:
   contents: write
@@ -42,6 +42,11 @@ jobs:
 
       - name: Collect, test & split
         run: python scripts/collect.py --sources sources.txt --mmdb Country.mmdb --xray ./xray/xray --out out
+
+      # بيجمع آي بيهات كلاودفلير النظيفة (المش متكشفة كـ VPN/بروكسي) — لو وقع ميوقفش نشر السيرفرات
+      - name: Collect clean IPs
+        continue-on-error: true
+        run: python scripts/cleanip.py --manual cleanip-manual.txt --sources cleanip-sources.txt --out out
 
       - name: Publish to "subs" branch
         run: |
