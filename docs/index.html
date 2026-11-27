@@ -168,6 +168,7 @@
       if (!r.ok) throw new Error(r.status);
       DATA = await r.json();
       render();
+      loadIps();
     } catch (e) {
       $('#main').innerHTML = `<div class="empty">⚠️ لسه مفيش بيانات.<br>لو لسه مشغّل المشروع، استنى أول تحديث يخلص (حوالي 10 دقايق) وارجع تاني.<br><small>${e}</small></div>`;
       $('#updated').textContent = '';
@@ -192,6 +193,11 @@
           <div class="tile" data-id="all"><div class="check">✓</div><div class="ic">🌍</div><div class="t">الكل</div><div class="d">${d.files.all.toLocaleString('ar')} سيرفر مترتبين بالبينج</div></div>
           ${d.files.telegram ? `<div class="tile" data-id="telegram"><div class="check">✓</div><div class="ic">📡</div><div class="t">تليجرام</div><div class="d">${d.files.telegram.toLocaleString('ar')} سيرفر جايين من قنوات تليجرام</div></div>` : ''}
         </div>
+      </section>
+      <section id="cleanipSec" style="display:none">
+        <h2><span>🧼 آي بي نظيف <small id="ipsNote" style="color:var(--muted)"></small></span><button id="copyIps">نسخ الكل</button></h2>
+        <div class="list" id="ips"></div>
+        <div class="note">آي بيهات كلاودفلير متجربة ومش متعلمة كـ VPN/بروكسي. استخدم الآي بي كعنوان سيرفر (Address) في أي كونفيج شغال على كلاودفلير وسيّب الـ SNI/Host زي ما هو، أو كـ Endpoint في WARP. البينج مقاس من سيرفرات GitHub، فجرّب على جهازك.</div>
       </section>
       <section>
         <h2>حسب البروتوكول</h2>
@@ -334,8 +340,35 @@
     closeSheets();
   };
 
+  async function loadIps() {
+    try {
+      const r = await fetch(RAW + 'cleanip.json?t=' + Date.now(), {cache: 'no-store'});
+      if (!r.ok) return;
+      const j = await r.json();
+      if (!j.ips || !j.ips.length) return;
+      $('#cleanipSec').style.display = '';
+      $('#ipsNote').textContent = `(${j.undetected ?? j.ips.length} مش متكشف من ${j.ips.length})`;
+      $('#ips').innerHTML = j.ips.map(x => `
+        <div class="row" data-ip="${x.ip}">
+          <div class="name"><b style="direction:ltr;display:inline-block">${x.ip}</b><span>${x.src === 'manual' ? '⭐ من قائمتك' : (x.vpn === true ? '⚠️ متعلم كبروكسي' : '✅ مش متكشف VPN')}</span></div>
+          <div class="ping ${pingClass(x.ms)}">${x.ms}ms</div>
+        </div>`).join('');
+      $('#ips').onclick = async e => {
+        const el = e.target.closest('[data-ip]');
+        if (!el) return;
+        await copyText(el.dataset.ip);
+        toast('اتنسخ الآي بي ✅');
+      };
+      $('#copyIps').onclick = async () => {
+        await copyText(j.ips.map(x => x.ip).join('\n'));
+        toast(`اتنسخ ${j.ips.length} آي بي ✅`);
+      };
+    } catch (e) {}
+  }
+
   load();
 })();
 </script>
 </body>
 </html>
+
